@@ -44,7 +44,7 @@ class AWBOdooActivationAPI(OdooAPI):
                 }
             )
 
-        serializer = Serializer(records, "{id, name, partner_id}", many=True)
+        serializer = Serializer(records, "{code, partner_id, partner_id.name}", many=True)
         data = serializer.data
         res = {
             "success": [{

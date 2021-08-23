@@ -1,3 +1,7 @@
+## [v13.0.1.7.3] - 2021-08-23
+
+    - [FIX] Minimum Due Currency
+    
 ## [v13.0.1.7.2] - 2021-07-05
 
     - [IMP] PDF Alignment and margin

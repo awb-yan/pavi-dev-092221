@@ -13,4 +13,5 @@ class CustomLead(models.Model):
                                 ("Convert", "Convert"),
                                 ("Disconnected", "Disconnected"),
                                 ("Pre-Termination", "Pre-Termination"),
+                                ("Transfer", "Transfer")
                                 ], string='Type')

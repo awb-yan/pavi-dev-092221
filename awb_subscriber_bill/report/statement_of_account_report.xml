@@ -117,7 +117,7 @@
                                         <span t-field="doc.total_statement_balance"/>
                                     </t>
                                     <t t-else="">
-                                       $ 0.00
+                                       0.00 Php
                                     </t>
                                 </td>
                                 <td style="width:25%; border: 2px solid black; text-align: center; font-size: 12px; padding: 2px;">

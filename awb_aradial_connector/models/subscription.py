@@ -34,7 +34,7 @@ class Subscription(models.Model):
             for line_item in rec.recurring_invoice_line_ids:
                 if line_item.product_id.type == 'service':
                     products.append(line_item.display_name)
-                    desc.append(line_item.name)  # descrition
+                    desc.append(line_item.name)  # description
                     desc.append(str(line_item.quantity))
                     if line_item.date_start:
                         desc.append(line_item.date_start.strftime("%b %d, %Y"))
@@ -68,6 +68,9 @@ class Subscription(models.Model):
                 products += line_id.product_id.display_name.upper()
             first_name = record.partner_id.first_name
             last_name = record.partner_id.last_name
+            if not first_name:
+                first_name = record.partner_id.name
+                last_name = ''
 
             pw = GeneratePassword()
             password = pw.generate_password()
@@ -79,13 +82,13 @@ class Subscription(models.Model):
                 'LastName': last_name,
                 'Address1': record.partner_id.street,
                 'Address2': record.partner_id.street2,
-                'City': record.partner_id.state_id.city,
+                'City': record.partner_id.city,
                 'State': record.partner_id.state_id.name,
                 'Country': record.partner_id.country_id.name,
                 'Zip': record.partner_id.zip,
                 'Offer': products,
                 'ServiceType': 'Internet',
-                'Start Date': record.date_start,
+                # 'Start Date': str(record.date_start,
                 'CustomInfo1': 'VDH',
                 'CustomInfo2': 'Postpaid',
                 'CustomInfo3': record.partner_id.customer_number,
@@ -134,12 +137,4 @@ class Subscription(models.Model):
             template_name=template_name,
             state=state
         )
-        _logger.info("----- Welcome SMS Sending Done -----")
-
-    def _send_activation_message(self, recordset, template_name, state):
-        self.env['awb.sms.send'].send_now(
-            recordset=recordset,
-            template_name=template_name,
-            state=state
-        )
-        _logger.info("----- Activation SMS Sending Done -----")
+        _logger.info("----- SMS Sending Done -----")

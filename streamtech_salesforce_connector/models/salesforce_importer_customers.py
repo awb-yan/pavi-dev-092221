@@ -1,22 +1,22 @@
 import logging
 import datetime
-import os
 
-from odoo import models
+from odoo import models, _
 from openerp.osv import osv
+from odoo.exceptions import Warning, ValidationError
 
 _logger = logging.getLogger(__name__)
+opportunity_required_msg = _('It is required to import also the Opportunities when importing Customers/Contacts. \nPlease check the Import Opportunities checkbox.')
 
 
 class SalesForceImporterCustomers(models.Model):
     _inherit = 'salesforce.connector'
 
     def import_customers(self, Auto):
-        _logger.info('----------------- STREAMTECH import_customers')
+        _logger.info('-------------------- STREAMTECH import_customers start')
         if not self.opportunities:
-            _logger.info('----------------- Import Opportunities checkbox was not checked')
-            raise osv.except_osv("Warning!", "It is required to import also the Opportunities when importing Customers/Contacts. " \
-                "Please check the Import Opportunities checkbox.")
+            _logger.error('Import Opportunities checkbox was not checked.')
+            raise Warning(opportunity_required_msg)
 
         # if not self.sales_force:
         #     self.connect_to_salesforce()
@@ -24,6 +24,7 @@ class SalesForceImporterCustomers(models.Model):
         # Added call to Import Opportunities instead of independently creating Accounts
         customer_sf_ids = []
         self.import_opportunities(Auto, customer_sf_ids)
+        _logger.info('-------------------- STREAMTECH import_customers end')
         return customer_sf_ids
 
         # Field/s removed due to errors found with usage with PAVI SalesForce:
@@ -107,6 +108,7 @@ class SalesForceImporterCustomers(models.Model):
         # return self.creating_contacts(contacts)
 
     def _create_customer(self, partner, lead_partner, zone=None, customer_sf_ids=[]):
+        _logger.info('-------------------- STREAMTECH _create_customer start')
         data = {
             'salesforce_id': partner['Id'],
             'name': partner['Name'],
@@ -240,6 +242,10 @@ class SalesForceImporterCustomers(models.Model):
             elif province_name == 'Western Samar':
                 province_name = 'Samar'
             province_id = self.env['res.country.state'].search([('name', '=ilike', province_name)])
+            # Added handling of multiple searched province of an Account
+            if len(province_id) > 1:
+                _logger.error(f'Multiple Province found in Odoo for Account with SF Id: {partner["Id"]}')
+                province_id = self.env['res.country.state'].search([('name', '=ilike', province_name)], limit=1)
 
         city_id = False
         if city_name:
@@ -253,6 +259,10 @@ class SalesForceImporterCustomers(models.Model):
             city_name = city_name.replace('Senator Ninoy Aquino', 'Sen. Ninoy Aquino')
             city_name = city_name.replace('President Manuel A. Roxas', 'Pres. Manuel A. Roxas')
             city_id = self.env['res.city'].search([('name', '=ilike', city_name), ('state_id', '=?', province_id.id)])
+            # Added handling of multiple searched city of an Account
+            if len(city_id) > 1:
+                _logger.error(f'Multiple City found in Odoo for Account with SF Id: {partner["Id"]}')
+                city_id = self.env['res.city'].search([('name', '=ilike', city_name), ('state_id', '=?', province_id.id)], limit=1)
 
         if not city_id or len(city_id) > 1:
             _logger.error(f'Multiple Cities: {data["salesforce_id"]} {city_name}:{city_id} {province_name}:{province_id}')
@@ -274,6 +284,7 @@ class SalesForceImporterCustomers(models.Model):
         lead_partner.action_assign_customer_id()
         customer_sf_ids.append(partner['Id'])
 
+        _logger.info('-------------------- STREAMTECH _create_customer end')
         return lead_partner
 
     def creating_contacts(self, contacts):
