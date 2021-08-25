@@ -34,8 +34,8 @@
                                 </div>
                                 <div class="col-12 col-lg-6 o_setting_box" attrs="{'invisible':[('sf_salesforce_enable','=',False)]}">
                                     <div class="o_setting_left_pane">
-                                                <field name="sf_salesforce_enable" class="col-lg-4"/>
-                                    <div>
+                                            <field name="sf_salesforce_enable" class="col-lg-4"/>
+                                    </div>
                                     <div class="o_setting_right_pane">
                                         <span class="o_form_label">Salesforce Credentials</span>
                                         <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
