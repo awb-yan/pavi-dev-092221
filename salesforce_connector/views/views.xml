@@ -42,6 +42,10 @@
                                         </div>
                                         <div class="content-group">
                                             <div class="row mt16">
+                                                <label for="sf_salesforce_enable"/>
+                                                <field name="sf_salesforce_enable"/>
+                                            </div>
+                                            <div class="row mt8">
                                                 <label for="external_report_layout_id" string="Username" class="col-lg-4 o_light_label"/>
                                                 <field name="sf_username"/>
                                             </div>
