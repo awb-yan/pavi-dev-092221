@@ -42,8 +42,8 @@
                                         </div>
                                         <div class="content-group">
                                             <div class="row mt16">
-                                                <field name="sf_salesforce_enable" class="col-lg-4"/>
-                                                <label for="sf_salesforce_enable" string="Connect to SF Sandbox?" class="o_light_label"/>
+                                                <field name="sf_salesforce_enable"/>
+                                                <label for="sf_salesforce_enable" string="Connect to SF Sandbox?" class="col-lg-4 o_light_label"/>
                                             </div>
                                             <div class="row mt8">
                                                 <label for="external_report_layout_id" string="Username" class="col-lg-4 o_light_label"/>
