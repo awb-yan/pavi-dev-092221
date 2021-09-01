@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="inherit_salesforce_setting" model="ir.ui.view">
+        <field name="name">res.config.settings.salesforce_settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res.config.settings.salesforce_settings"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('app_settings_block')]/div[hasid('salesforce_Settings')]/div[hasclass('o_settings_container')]/div[hasclass('o_setting_box')][2]" position="inside">
+                <h1>Hello World</h1>                
+            </xpath>
+        </field>
+    </record>
+</odoo>
