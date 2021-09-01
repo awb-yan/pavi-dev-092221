@@ -11,8 +11,8 @@
             <field name="model">res.config.settings</field>
             <field name="inherit_id" ref="res.config.settings.salesforce_settings"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@class='app_settings_block']/div[@id='salesforce_Settings']/div[@class='o_settings_container'][1]/div[@class='o_setting_box'][2]/div[@class='o_setting_left_pane']" position="inside">
-                    <h1>Hello World</h1>                
+                <xpath expr="//div[@class='app_settings_block']/div[@id='salesforce_Settings']/div[@class='o_settings_container']/div[@class='o_setting_box'][2]/div[@class='o_setting_left_pane']" position="inside">
+                    <h3>Hello World</h3>
                 </xpath>
             </field>
         </record>
