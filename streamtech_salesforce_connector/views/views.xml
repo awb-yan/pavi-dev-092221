@@ -6,8 +6,8 @@
         </record>
     </data>
     <data>
-        <record id="inherit_salesforce_setting" model="ir.ui.view">
-            <field name="name">inherit.res.config.settings.salesforce_settings</field>
+        <record id="res_config_settings_salesforce_settings_inherit" model="ir.ui.view">
+            <field name="name">res.config.settings.salesforce.settings.inherit</field>
             <field name="model">res.config.settings</field>
             <field name="inherit_id" ref="res.config.settings.salesforce_settings"/>
             <field name="arch" type="xml">
