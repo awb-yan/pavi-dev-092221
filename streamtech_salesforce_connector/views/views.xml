@@ -9,7 +9,7 @@
         <record id="res_config_settings_salesforce_settings_inherit" model="ir.ui.view">
             <field name="name">res.config.settings.salesforce.settings.inherit</field>
             <field name="model">res.config.settings</field>
-            <field name="inherit_id" ref="salesforce_setting"/>
+            <field name="inherit_id" ref="res.config.settings.salesforce_setting"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@class='app_settings_block']/div[@id='salesforce_Settings']/div[@class='o_settings_container']/div[@class='o_setting_box'][2]/div[@class='o_setting_left_pane']" position="inside">
                     <h3>Hello World</h3>
