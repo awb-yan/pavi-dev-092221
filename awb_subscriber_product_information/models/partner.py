@@ -77,7 +77,8 @@ ACCOUNT_CLASSIFICATION = [('internal', 'Affiliate / Internal'),
                           ('vistamall kawit','VistaMall Kawit'),
                           ('vistamall global south','VistaMall Global South'),
                           ('vistamall cabanatuan','VistaMall Cabanatuan'),
-                          ('vistamall sta. maria bulacan','VistaMall Sta. Maria Bulacan')]
+                          ('vistamall sta. maria bulacan','VistaMall Sta. Maria Bulacan'),
+                          ('sme2','SME2')]
 
 
 class PartnerAccountClassification(models.Model):
@@ -126,7 +127,9 @@ class Partner(models.Model):
                                         ('internal', 'Internal'),
                                         ('msme', 'MSME'),
                                         ('external', 'External'),
-                                        ('mall tenants', 'Mall Tenants')], string='Subscriber Type')
+                                        ('mall tenants', 'Mall Tenants'),
+                                        ('internal - inside mall', 'Internal - Inside Mall'),
+                                        ('internal - outside mall', 'Internal - Outside Mall')], string='Subscriber Type')
     account_group = fields.Selection([('vista', 'Vista'),
                                      ('non-vista', 'Non-Vista')], string='Account Group')
     account_type = fields.Selection([('corporate', 'Corporate'),

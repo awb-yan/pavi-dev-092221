@@ -1,4 +1,4 @@
-from ..helpers.password_generator import GeneratePassword
+# from ..helpers.password_generator import GeneratePassword
 from odoo import api, fields, models, exceptions, _
 from openerp.exceptions import Warning
 
@@ -15,8 +15,9 @@ class Subscription(models.Model):
 
     @api.model
     def create(self, vals):
-        vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-        vals['in_progress'] = False
+        if vals['aradial_product']: #TODO: for update to actual field name
+            vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+            vals['in_progress'] = False
 
         res = super(Subscription, self).create(vals)
         return res
@@ -60,55 +61,65 @@ class Subscription(models.Model):
             record.stage_id.name
         )
 
-        if is_valid == True:
+        if is_valid:
+            if record.aradial_product: #TODO: for update to actual field name
 
-            products = ""
+                products = ""
 
-            for line_id in record.recurring_invoice_line_ids:
-                products += line_id.product_id.display_name.upper()
-            first_name = record.partner_id.first_name
-            last_name = record.partner_id.last_name
-            if not first_name:
-                first_name = record.partner_id.name
-                last_name = ''
+                for line_id in record.recurring_invoice_line_ids:
+                    products += line_id.product_id.display_name.upper()
+                    facility_type = line_id.product_id.facility_type #TODO: for update to actual field name
+                    plan_type = line_id.product_id.plan_type #TODO: for update to actual field name
+                first_name = record.partner_id.first_name
+                last_name = record.partner_id.last_name
+                if not first_name:
+                    first_name = record.partner_id.name
+                    last_name = ''
 
-            pw = GeneratePassword()
-            password = pw.generate_password()
+                # pw = GeneratePassword()
+                # password = pw.generate_password()
 
-            self.data = {
-                'UserID': record.code,
-                'Password': password,
-                'FirstName': first_name,
-                'LastName': last_name,
-                'Address1': record.partner_id.street,
-                'Address2': record.partner_id.street2,
-                'City': record.partner_id.city,
-                'State': record.partner_id.state_id.name,
-                'Country': record.partner_id.country_id.name,
-                'Zip': record.partner_id.zip,
-                'Offer': products,
-                'ServiceType': 'Internet',
-                # 'Start Date': str(record.date_start,
-                'CustomInfo1': 'VDH',
-                'CustomInfo2': 'Postpaid',
-                'CustomInfo3': record.partner_id.customer_number,
-            }
+                self.data = {
+                    'UserID': record.sms_id_username, #TODO: for update to actual field name
+                    'Password': record.sms_id_password, #TODO: for update to actual field name
+                    'FirstName': first_name,
+                    'LastName': last_name,
+                    'Address1': record.partner_id.street,
+                    'Address2': record.partner_id.street2,
+                    'City': record.partner_id.city,
+                    'State': record.partner_id.state_id.name,
+                    'Country': record.partner_id.country_id.name,
+                    'Zip': record.partner_id.zip,
+                    'Offer': products,
+                    'ServiceType': 'Internet',
+                    # 'Start Date': str(record.date_start,
+                    'CustomInfo1': facility_type,
+                    'CustomInfo2': plan_type,
+                    'CustomInfo3': record.partner_id.customer_number,
+                }
 
-            _logger.info("User Details:")
-            _logger.info("UserID: %s" % self.data['UserID'])
-            _logger.info("Offer: %s" % self.data['Offer'])
-            _logger.info("First Name: %s" % self.data['FirstName'])
-            _logger.info("Last Name: %s" % self.data['LastName'])
+                _logger.info("User Details:")
+                _logger.info("UserID: %s" % self.data['UserID'])
+                _logger.info("Offer: %s" % self.data['Offer'])
+                _logger.info("First Name: %s" % self.data['FirstName'])
+                _logger.info("Last Name: %s" % self.data['LastName'])
 
-            isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
+                isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
 
-            if isUserCreationSuccessful:
+                if isUserCreationSuccessful:
+                    self.record.write({
+                        'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
+                        'in_progress': True
+                    })
+                else:
+                    raise Warning("User Creation in Aradial: FAILED")
+            else:
+                # TODO: send activation text message, update stage to In Progress
                 self.record.write({
                     'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
                     'in_progress': True
                 })
-            else:
-                raise Warning("User Creation in Aradial: FAILED")
+
 
     def _validate_parameters(
         self,

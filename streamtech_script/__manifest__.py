@@ -5,31 +5,34 @@
 #
 ##############################################################################
 {
-    'name': "Streamtech Subscriber Bill Payment",
+    'name': "Streamtech Data Migration Scripts",
 
     'summary': """
-        Subscriber Bill Payment
+        Streamtech Data Migration Scripts
         """,
 
     'description': """
-        Subscriber Bill Payment
+        Extension Odoo Apps
     """,
 
     'author': "Achieve Without Borders",
 
     'license': 'LGPL-3',
 
-    'category': 'Localization',
+    'category': 'Data Migration',
 
-    'version': '13.0.1.3.1',
+    'version': '13.0.0.0.1',
 
-    'depends': ['awb_subscriber_bill', 'awb_subscriber_bill_automation'],
+    'depends': [
+        'base',
+        'mail'
+    ],
 
     'data': [
-        'views/account_payment_views.xml'
-    ],
-    'qweb': [
-        # 'static/src/xml/account_invoice_tree_header.xml'
+        'security/ir.model.access.csv',
+        'views/streamtech_scripts_view.xml',
+        'views/menuitem.xml',
+        'data/streamtech_scripts_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

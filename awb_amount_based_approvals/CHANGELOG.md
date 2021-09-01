@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [13.0.1.0.0] - 2021-07-12
+## [13.0.1.1.1] - 2021-08-23
 
-- Initial Version
+- [FIX] Multi-Company Issue for Approval request
 
 ## [13.0.1.1.0] - 2021-07-22
 
@@ -16,3 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ADD] Field Operation Head for Department form.
 - [ADD] Sequence for List of Approvers
 - [ADD] Manager and Operation Value in list of approvers
+
+## [13.0.1.0.0] - 2021-07-12
+
+- Initial Version

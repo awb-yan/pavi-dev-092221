@@ -8,7 +8,7 @@
     'name': "AWB Product Segmentation",
 
     'summary': """
-        Amount Based Approvals
+        Product Segmentation
         """,
 
     'description': """
@@ -21,7 +21,7 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.0.0',
+    'version': '13.0.1.0.1',
 
     'depends': ['sale_management', 'sale_subscription'],
 

@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="hr.view_department_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group/field[@name='parent_id']" position="after">
-                <field name="operation_head" />
+                <field name="operation_head" domain="[('company_id', '=', company_id)]" />
             </xpath>
         </field>
     </record>
