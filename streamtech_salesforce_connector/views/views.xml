@@ -11,8 +11,9 @@
             <field name="model">salesforce.connector</field>
             <field name="inherit_id" ref="salesforce_connector.salesforce_setting"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@class='app_settings_block']/div[@id='salesforce_Settings']/div[@class='o_settings_container']/div[@class='o_setting_box'][2]/div[@class='o_setting_left_pane']" position="inside">
-                    <h3>Hello World</h3>
+                <xpath expr="//div[@class='app_settings_block']/div[@id='salesforce_Settings']" position="inside">
+                    <h2>Salesforce Settings</h2>
+
                 </xpath>
             </field>
         </record>
