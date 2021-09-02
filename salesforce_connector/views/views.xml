@@ -15,6 +15,141 @@
                     <div class="app_settings_block" data-string="Salesforce" string="Salesforce" data-key="salesforce_connector" groups="sales_team.group_sale_manager">
                         <div id="salesforce_Settings">
                         </div>
+                        <div id="salesforce_CRM">
+                            <h2>Salesforce CRM</h2>
+                            <div class="row mt16 o_settings_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_lead"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_lead"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming leads with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_opportunity"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_opportunity"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming opportunities with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="salesforce_Sales">
+                            <h2>Salesforce Sales</h2>
+                            <div class="row mt16 o_settings_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_saleorder"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_saleorder"/>
+                                        <div class="text-muted">
+                                            Synchronize orders with Salesforce(Deletion).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_quote"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_quote"/>
+                                        <div class="text-muted">
+                                            Synchronize quotes with Salesforce(Deletion).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_product"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_product"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming products with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_account"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_account"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming customers with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_contract"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_contract"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming contracts with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="salesforce_Contacts">
+                            <h2>Salesforce Contacts</h2>
+                            <div class="row mt16 o_settings_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_contact"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_contact"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming contacts with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="salesforce_Event">
+                            <h2>Salesforce Events</h2>
+                            <div class="row mt16 o_settings_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_event"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_event"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming events with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="salesforce_Tasks">
+                            <h2>Salesforce Tasks</h2>
+                            <div class="row mt16 o_settings_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="sf_task"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="sf_task"/>
+                                        <div class="text-muted">
+                                            Synchronize upcoming tasks with Salesforce.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </xpath>
             </field>
