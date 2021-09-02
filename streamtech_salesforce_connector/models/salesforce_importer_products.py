@@ -1,3 +1,4 @@
+from ..helpers.salesforce_connector import SalesForceConnect
 import logging
 import datetime
 
@@ -120,8 +121,11 @@ class SalesForceImporterProducts(models.Model):
                 " FROM Product2 " \
                 " WHERE IsActive = True"
 
-        if not self.sales_force:
-            self.connect_to_salesforce()
+        sf = SalesForceConnect()
+        self.sales_force = sf.connect_salesforce()
+
+        # if not self.sales_force:
+        #     self.connect_to_salesforce()
 
         if id:
             query += " AND Id ='" + id + "'"

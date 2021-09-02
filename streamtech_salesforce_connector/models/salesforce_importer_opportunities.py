@@ -1,3 +1,4 @@
+from ..helpers.salesforce_connector import SalesForceConnect
 import logging
 import datetime
 import unicodedata
@@ -16,8 +17,12 @@ class SalesForceImporterOpportunities(models.Model):
 
     def import_opportunities(self, Auto, customer_sf_ids=[]):
         _logger.info('-------------------- STREAMTECH import_opportunities start')
-        if not self.sales_force:
-            self.connect_to_salesforce()
+
+        sf = SalesForceConnect()
+        self.sales_force = sf.connect_salesforce()
+        
+        # if not self.sales_force:
+        #     self.connect_to_salesforce()
 
         # Field/s removed due to errors found with usage with PAVI SalesForce:
         #  ExpectedRevenue
