@@ -11,7 +11,7 @@
             <field name="model">salesforce.connector</field>
             <field name="inherit_id" ref="salesforce_connector.salesforce_setting" />
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('app_settings_block')]/div[@id:'salesforce_Settings']" position="after">
+                <xpath expr="//div[hasclass('app_settings_block')]/div[@id:'salesforce_Settings']" position="inside">
                     <h2> Salesforce Settings </h2>
                 </xpath>
             </field>
