@@ -19,7 +19,8 @@
     'depends': ['salesforce_connector', 'awb_subscriber_bill_automation', 'awb_subscriber_product_information'],
     'data': [
         'views/crm_view.xml',
-        'views/partner_view.xml'
+        'views/partner_view.xml',
+        'views/views.xml'
     ],
     'installable': True,
     'application': False,
