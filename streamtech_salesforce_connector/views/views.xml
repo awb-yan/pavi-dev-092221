@@ -12,9 +12,9 @@
             <field name="inherit_id" ref="res.config.settings.salesforce_settings" />
             <field name="arch" type="xml">
                 <xpath expr="//div[hasclass('settings')]/div[@data-key='salesforce_connector']/div[@id='salesforce_Settings']" position="after">
-                        <div id="salesforce_Yan">
-                            <h2>Yan</h2>
-                        </div>
+                    <div id="salesforce_Yan">
+                        <h2>Yan</h2>
+                    </div>
                 </xpath>
             </field>
         </record>
