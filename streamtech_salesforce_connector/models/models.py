@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 
 
 class StreamtechSalesForceSettingModel(models.TransientModel):
-    _inherit = 'res.config.settings'
+    _inherit = 'salesforce.connector'
 
     sf_sandbox = fields.Boolean(string="Connect to SF Sandbox?", default=False)
 
