@@ -63,38 +63,38 @@ class StreamtechSalesForceSettingModel(models.TransientModel):
                 sf = Salesforce(username=username, password=password, security_token=security, domain="test")
             else:
                 sf = Salesforce(username=username, password=password, security_token=security)
-            query = "select id,name,title,email,phone,city,country,postalCode, state, street from User"
-            extend_query = " where email='" + self.env.user.email + "'"
-            user = sf.query(query + extend_query)["records"][0]
-            user = sf.query(query + extend_query)["records"][0]
-            odoo_user = self.env['res.users'].search([('email', '=', user['Email'])])
-            if odoo_user:
-                odoo_user.write({
-                    'salesforce_id': user['Id'],
-                })
-                self.env.cr.commit()
+            # query = "select id,name,title,email,phone,city,country,postalCode, state, street from User"
+            # extend_query = " where email='" + self.env.user.email + "'"
+            # user = sf.query(query + extend_query)["records"][0]
+            # user = sf.query(query + extend_query)["records"][0]
+            # odoo_user = self.env['res.users'].search([('email', '=', user['Email'])])
+            # if odoo_user:
+            #     odoo_user.write({
+            #         'salesforce_id': user['Id'],
+            #     })
+            #     self.env.cr.commit()
 
-            if not odoo_user:
-                if user['Title']:
-                    user_title = self.env['res.partner.title'].search([('name', '=', user['Title'])])
-                    if not user_title:
-                        user_title = self.env['res.partner.title'].create({
-                            'name': user['Title']
-                        })
-                user = self.env['res.users'].create({
-                    'salesforce_id': user['Id'],
-                    'name': user['Name'] if user['Name'] else None,
-                    'login': user['Email'] if user['Email'] else None,
-                    'phone': user['Phone'] if user['Phone'] else None,
-                    'email': user['Email'] if user['Email'] else None,
-                    'city': user['City'] if user['City'] else None,
-                    'street': user['Street'] if user['Street'] else None,
-                    'zip': user['PostalCode'] if user['PostalCode'] else None,
-                    'state_id': self.env['res.country.state'].search(
-                        [('name', '=', user['State'])]).id if
-                    user['State'] else None,
-                    'title': user_title.id if user_title else None,
-                })
+            # if not odoo_user:
+            #     if user['Title']:
+            #         user_title = self.env['res.partner.title'].search([('name', '=', user['Title'])])
+            #         if not user_title:
+            #             user_title = self.env['res.partner.title'].create({
+            #                 'name': user['Title']
+            #             })
+            #     user = self.env['res.users'].create({
+            #         'salesforce_id': user['Id'],
+            #         'name': user['Name'] if user['Name'] else None,
+            #         'login': user['Email'] if user['Email'] else None,
+            #         'phone': user['Phone'] if user['Phone'] else None,
+            #         'email': user['Email'] if user['Email'] else None,
+            #         'city': user['City'] if user['City'] else None,
+            #         'street': user['Street'] if user['Street'] else None,
+            #         'zip': user['PostalCode'] if user['PostalCode'] else None,
+            #         'state_id': self.env['res.country.state'].search(
+            #             [('name', '=', user['State'])]).id if
+            #         user['State'] else None,
+            #         'title': user_title.id if user_title else None,
+            #     })
 
 
         except Exception as e:
