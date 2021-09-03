@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 class StreamtechSalesForceSettingModel(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    sf_sandbox = fields.Boolean(string="Connect to SF Sandbox?", default=False)
+    sf_sandbox = fields.Boolean(string="SF Sandbox", default=False)
 
     def get_log(self):
         self.ensure_one()
