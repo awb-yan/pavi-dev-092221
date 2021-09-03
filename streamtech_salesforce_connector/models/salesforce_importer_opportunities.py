@@ -19,7 +19,7 @@ class SalesForceImporterOpportunities(models.Model):
         _logger.info('-------------------- STREAMTECH import_opportunities start')
 
         sf = SalesForceConnect()
-        self.sales_force = sf.connect_salesforce()
+        self.sales_force = sf.connect_salesforce(self)
         
         # if not self.sales_force:
         #     self.connect_to_salesforce()
