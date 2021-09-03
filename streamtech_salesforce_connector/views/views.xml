@@ -18,7 +18,7 @@
                                 <field name="sf_sandbox"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="sf_sandbox"/>
+                                <label for="sf_sandbox" class="o_light_label"/>
                             </div>
                         </div>
                     </div>
