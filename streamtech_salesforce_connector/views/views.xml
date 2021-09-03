@@ -6,10 +6,10 @@
         </record>
     </data>
     <data>
-        <record model="ir.ui.view" id="salesforce_settings_inherit">
-            <field name="name">res.config.settings.salesforce.settings.inherit</field>
+        <record model="ir.ui.view" id="salesforce_setting_inherit">
+            <field name="name">res.config.settings.salesforce.setting.inherit</field>
             <field name="model">res.config.settings</field>
-            <field name="inherit_id" ref="res.config.settings.salesforce_setting"/>
+            <field name="inherit_id" ref="salesforce_connector.salesforce_setting"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[hasclass('settings')]/div[@data-key='salesforce_connector']/div[@id='salesforce_Settings']" position="after">
                     <div id="salesforce_Yan">
