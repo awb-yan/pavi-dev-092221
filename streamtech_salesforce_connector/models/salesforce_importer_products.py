@@ -122,7 +122,7 @@ class SalesForceImporterProducts(models.Model):
                 " WHERE IsActive = True"
 
         sf = SalesForceConnect()
-        self.sales_force = sf.connect_salesforce()
+        self.sales_force = sf.connect_salesforce('salesforce.connector')
 
         # if not self.sales_force:
         #     self.connect_to_salesforce()
