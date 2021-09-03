@@ -26,6 +26,7 @@ class StreamtechSalesForceSettingModel(models.TransientModel):
             'context': "{'create': False}"
         }
 
+    @api.model
     def set_values(self):
         res = super(StreamtechSalesForceSettingModel, self).set_values()
         self.env['ir.config_parameter'].set_param('odoo_salesforce.sf_sandbox', self.sf_sandbox)
