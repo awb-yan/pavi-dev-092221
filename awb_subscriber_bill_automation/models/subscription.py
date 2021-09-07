@@ -40,6 +40,8 @@ class SaleSubscription(models.Model):
         # Commenting this for now
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
+        _logger.info('vals')
+        _logger.info(vals)
 
         self.record = vals
 
