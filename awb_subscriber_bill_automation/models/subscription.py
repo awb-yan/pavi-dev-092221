@@ -58,11 +58,10 @@ class SaleSubscription(models.Model):
 
         self.record = record
 
-        self.record.write({
-            'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id,
-            'in_progress': False
-        })
+        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        self.record['in_progress'] = False
 
+        self.env.cr.commit()
 
     def _activation(self, record, max_retries):
         for count in range(max_retries):
