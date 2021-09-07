@@ -43,7 +43,8 @@ class SaleSubscription(models.Model):
         _logger.info('vals')
         _logger.info(vals)
 
-        self.record = vals
+        self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals['opportunity_id'])])
+        _logger.info(self.record)
 
         # ----- SMS Code -----
         # PROVISIONING
