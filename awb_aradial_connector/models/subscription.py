@@ -47,7 +47,10 @@ class Subscription(models.Model):
         record=None
     ):
         
+        _logger.info("=== ============ ===")
         _logger.info("=== Subscription ===")
+        _logger.info(record)
+        _logger.info("=== ============ ===")
 
         if not record:
             raise exceptions.ValidationError(
