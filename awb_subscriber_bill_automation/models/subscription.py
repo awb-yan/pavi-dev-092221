@@ -41,6 +41,9 @@ class SaleSubscription(models.Model):
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
+        vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        vals['in_progress'] = False
+
         company_id = vals.get('company_id')
         company = self.env['res.company'].browse([company_id])
 
@@ -52,38 +55,27 @@ class SaleSubscription(models.Model):
             raise UserError("No Active company code, Please check your company code settings")
 
         vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
-        # _logger.info('vals')
-        # _logger.info(vals)
-
-        self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals.get('opportunity_id'))])
-        _logger.info(self.record)
-
-        # # ----- SMS Code -----
-        # # PROVISIONING
-        # self._provisioning(self.record)
-
-        # # ACTIVATION
-        # max_retries = 3
-        # self._activation(self.record, max_retries)
 
         res = super(SaleSubscription, self).create(vals)
         return res
     
-    def _provisioning(self, record):
+    # def _provisioning(self, record):
 
-        self.record = record
-        _logger.info(' === _provisioning ===')
-        _logger.info(record)
+    #     self.record = record
+    #     _logger.info(' === _provisioning ===')
+    #     _logger.info(record)
 
-        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-        self.record['in_progress'] = False
+    #     self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+    #     self.record['in_progress'] = False
 
-        self.env.cr.commit()
+    #     self.env.cr.commit()
 
-    def _activation(self, record, max_retries):
+    def _activation(self, record):
 
         _logger.info(' === activation ===')
         _logger.info(record)
+
+        max_retries = 3
 
         for count in range(max_retries):
             if self._route_facility(record):
@@ -92,15 +84,50 @@ class SaleSubscription(models.Model):
                 if count == 2:
                     _logger.info('add to failed transaction log')
 
-        self._activate(record)
+        # self._activate(record)
         # self._generate_atmref(record)
 
 
     def _route_facility(self, record):
+        for line_id in record.recurring_invoice_line_ids:
+            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
+                product = line_id.product_id.display_name.upper()
+                facility_type = line_id.product_id.product_tmpl_id.sf_facility_type.name            #TODO: for update to actual field name
+                plan_type = line_id.product_id.product_tmpl_id.sf_plan_type.name                    #TODO: for update to actual field name
+        first_name = record.partner_id.first_name
+        last_name = record.partner_id.last_name
+        if not first_name:
+            first_name = record.partner_id.name
+            last_name = ''
+
+        # self.data = {
+        #     'UserID': record.opportunity_id.jo_sms_id_username,                #TODO: for update to actual field name
+        #     'Password': record.opportunity_id.jo_sms_id_password,              #TODO: for update to actual field name
+        #     'FirstName': first_name,
+        #     'LastName': last_name,
+        #     'Address1': record.partner_id.street,
+        #     'Address2': record.partner_id.street2,
+        #     'City': record.partner_id.city,
+        #     'State': record.partner_id.state_id.name,
+        #     'Country': record.partner_id.country_id.name,
+        #     'Zip': record.partner_id.zip,
+        #     'Offer': product,
+        #     'ServiceType': 'Internet',
+        #     'CustomInfo1': facility_type,
+        #     'CustomInfo2': plan_type,
+        #     'CustomInfo3': record.partner_id.customer_number
+        # }
+        _logger.info(facility_type)
+        _logger.info(aradial_flag)
+        _logger.info(product)
+        _logger.info(plan_type)
+
+        return True
 
 
         # if aradial_flag:
-        return self.env['aradial.connector'].create_user(record)
+        # return self.env['aradial.connector'].create_user(record)
         # else:
         #     return True
 
