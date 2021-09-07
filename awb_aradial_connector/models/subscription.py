@@ -1,6 +1,7 @@
 # from ..helpers.password_generator import GeneratePassword
 from odoo import api, fields, models, exceptions, _
 from openerp.exceptions import Warning
+from datetime import datetime
 
 import logging
 
@@ -15,9 +16,8 @@ class Subscription(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals['aradial_product']: #TODO: for update to actual field name
-            vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-            vals['in_progress'] = False
+        vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        vals['in_progress'] = False
 
         res = super(Subscription, self).create(vals)
         return res
@@ -64,39 +64,7 @@ class Subscription(models.Model):
         if is_valid:
             if record.aradial_product: #TODO: for update to actual field name
 
-                products = ""
-
-                for line_id in record.recurring_invoice_line_ids:
-                    products += line_id.product_id.display_name.upper()
-                    facility_type = line_id.product_id.facility_type #TODO: for update to actual field name
-                    plan_type = line_id.product_id.plan_type #TODO: for update to actual field name
-                first_name = record.partner_id.first_name
-                last_name = record.partner_id.last_name
-                if not first_name:
-                    first_name = record.partner_id.name
-                    last_name = ''
-
-                # pw = GeneratePassword()
-                # password = pw.generate_password()
-
-                self.data = {
-                    'UserID': record.sms_id_username, #TODO: for update to actual field name
-                    'Password': record.sms_id_password, #TODO: for update to actual field name
-                    'FirstName': first_name,
-                    'LastName': last_name,
-                    'Address1': record.partner_id.street,
-                    'Address2': record.partner_id.street2,
-                    'City': record.partner_id.city,
-                    'State': record.partner_id.state_id.name,
-                    'Country': record.partner_id.country_id.name,
-                    'Zip': record.partner_id.zip,
-                    'Offer': products,
-                    'ServiceType': 'Internet',
-                    # 'Start Date': str(record.date_start,
-                    'CustomInfo1': facility_type,
-                    'CustomInfo2': plan_type,
-                    'CustomInfo3': record.partner_id.customer_number,
-                }
+                self.data = self._compose_aradial_payload(record)
 
                 _logger.info("User Details:")
                 _logger.info("UserID: %s" % self.data['UserID'])
@@ -104,17 +72,19 @@ class Subscription(models.Model):
                 _logger.info("First Name: %s" % self.data['FirstName'])
                 _logger.info("Last Name: %s" % self.data['LastName'])
 
-                isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
+                for count in range(3):
+                    isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
 
-                if isUserCreationSuccessful:
-                    self.record.write({
-                        'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
-                        'in_progress': True
-                    })
-                else:
-                    raise Warning("User Creation in Aradial: FAILED")
+                    if isUserCreationSuccessful:
+                        self.now_date_time = self._successful_user_creation()
+
+                        return self.now_date_time
+                    else:
+                        if count == 2:
+                            _logger.info("error user creation")
+                            # add to failure list
+
             else:
-                # TODO: send activation text message, update stage to In Progress
                 self.record.write({
                     'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
                     'in_progress': True
@@ -141,6 +111,60 @@ class Subscription(models.Model):
 
         _logger.info("Valid Subscription")
         return True
+    
+    def _compose_aradial_payload(
+        self, 
+        record
+    ):
+        products = ""
+
+        for line_id in record.recurring_invoice_line_ids:
+            products += line_id.product_id.display_name.upper()
+            facility_type = line_id.product_id.facility_type #TODO: for update to actual field name
+            plan_type = line_id.product_id.plan_type #TODO: for update to actual field name
+        first_name = record.partner_id.first_name
+        last_name = record.partner_id.last_name
+        if not first_name:
+            first_name = record.partner_id.name
+            last_name = ''
+
+        data = {
+            'UserID': record.opportunity_id.sms_id_username, #TODO: for update to actual field name
+            'Password': record.opportunity_id.sms_id_password, #TODO: for update to actual field name
+            'FirstName': first_name,
+            'LastName': last_name,
+            'Address1': record.partner_id.street,
+            'Address2': record.partner_id.street2,
+            'City': record.partner_id.city,
+            'State': record.partner_id.state_id.name,
+            'Country': record.partner_id.country_id.name,
+            'Zip': record.partner_id.zip,
+            'Offer': products,
+            'ServiceType': 'Internet',
+            'CustomInfo1': facility_type,
+            'CustomInfo2': plan_type,
+            'CustomInfo3': record.partner_id.customer_number,
+        }
+
+        return data        
+
+    def _successful_user_creation(self):
+
+        # 1. Get current time
+        now = datetime.now()
+        self.now_date = now.strftime("%Y-%m-%d")
+        self.now_date_time = now.strftime("%m/%d/%Y %H:%M%p")
+
+        # 2. Update Subscription Start date
+        self.record.write({
+            'date_start': self.now_date,
+            'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
+            'in_progress': True
+        })
+
+        # 3. Call SF API to update start date
+        return self.now_date_time
+
 
     def _send_welcome_message(self, recordset, template_name, state):
         self.env['awb.sms.send'].send_now(

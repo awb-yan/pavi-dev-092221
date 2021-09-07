@@ -13,10 +13,41 @@ class AWBAradialConnector(models.Model):
 
     def create_user(
         self, 
-        data
+        record
     ):
 
         _logger.info("Create User")
+
+        products = ""
+
+        for line_id in record.recurring_invoice_line_ids:
+            if line_id.product_id.display_name.upper() != "DEVICE FEE":
+                products += line_id.product_id.display_name.upper()
+            facility_type = line_id.product_id.facility_type #TODO: for update to actual field name
+            plan_type = line_id.product_id.plan_type #TODO: for update to actual field name
+        first_name = record.partner_id.first_name
+        last_name = record.partner_id.last_name
+        if not first_name:
+            first_name = record.partner_id.name
+            last_name = ''
+
+        data = {
+            'UserID': record.opportunity_id.sms_id_username, #TODO: for update to actual field name
+            'Password': record.opportunity_id.sms_id_password, #TODO: for update to actual field name
+            'FirstName': first_name,
+            'LastName': last_name,
+            'Address1': record.partner_id.street,
+            'Address2': record.partner_id.street2,
+            'City': record.partner_id.city,
+            'State': record.partner_id.state_id.name,
+            'Country': record.partner_id.country_id.name,
+            'Zip': record.partner_id.zip,
+            'Offer': products,
+            'ServiceType': 'Internet',
+            'CustomInfo1': facility_type,
+            'CustomInfo2': plan_type,
+            'CustomInfo3': record.code
+        }
 
         params = self.env['ir.config_parameter'].sudo()
         aradial_url = params.get_param('aradial_url')

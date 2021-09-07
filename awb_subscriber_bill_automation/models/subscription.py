@@ -8,6 +8,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
+import datetime
 
 import logging
 
@@ -40,6 +41,88 @@ class SaleSubscription(models.Model):
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
+        self.record = vals
+
+        # ----- SMS Code -----
+        # PROVISIONING
+        self._provisioning(self.record)
+
+        # ACTIVATION
+        max_retries = 3
+        self._activation(self.record, max_retries)
+
+        res = super(SaleSubscription, self).create(vals)
+        return res
+    
+    def _provisioning(self, record):
+
+        self.record = record
+
+        self.record.write({
+            'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id,
+            'in_progress': False
+        })
+
+
+    def _activation(self, record, max_retries):
+        for count in range(max_retries):
+            if self._route_facility(record):
+                break
+            else:
+                if count == 2:
+                    _logger.info('add to failed transaction log')
+
+        self._activate(record)
+        self._generate_atmref(record)
+
+
+    def _route_facility(self, record):
+
+        for line_id in record.recurring_invoice_line_ids:
+            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                aradial_flag = record.line_id.product_id.aradial_product    #TODO: for update to actual field name
+                product = line_id.product_id.display_name.upper()
+                facility_type = line_id.product_id.facility_type            #TODO: for update to actual field name
+                plan_type = line_id.product_id.plan_type                    #TODO: for update to actual field name
+        first_name = record.partner_id.first_name
+        last_name = record.partner_id.last_name
+        if not first_name:
+            first_name = record.partner_id.name
+            last_name = ''
+
+        self.data = {
+            'UserID': record.opportunity_id.sms_id_username,                #TODO: for update to actual field name
+            'Password': record.opportunity_id.sms_id_password,              #TODO: for update to actual field name
+            'FirstName': first_name,
+            'LastName': last_name,
+            'Address1': record.partner_id.street,
+            'Address2': record.partner_id.street2,
+            'City': record.partner_id.city,
+            'State': record.partner_id.state_id.name,
+            'Country': record.partner_id.country_id.name,
+            'Zip': record.partner_id.zip,
+            'Offer': product,
+            'ServiceType': 'Internet',
+            'CustomInfo1': facility_type,
+            'CustomInfo2': plan_type,
+            'CustomInfo3': record.partner_id.customer_number
+        }
+
+        if aradial_flag:
+            return self.env['aradial.connector'].create_user(self.data)
+        else:
+            return True
+
+    def _activate(self, record):
+        self.record = record;
+        now = datetime.now().strftime("%Y-%m-%d")
+        self.record.write({
+            'date_start': now,
+            'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
+            'in_progress': True
+        })
+
+    def _generate_atmref(self, vals):
         company_id = vals.get('company_id')
         company = self.env['res.company'].browse([company_id])
 
@@ -51,9 +134,6 @@ class SaleSubscription(models.Model):
             raise UserError("No Active company code, Please check your company code settings")
 
         vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
-
-        res = super(SaleSubscription, self).create(vals)
-        return res
 
     @api.depends("atm_ref_sequence")
     def _compute_atm_reference_number(self):

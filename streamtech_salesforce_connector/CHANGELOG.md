@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [13.0.1.2.0] - 2021-09-06
+   - [IMP] Added Salesforce group in Product record
+   - [IMP] Added new field facility_type in Product record under Salesforce group
+   - [IMP] Added new field plan_type in Product record under Salesforce group
+   - [IMP] Added security access for new models created (product_plan_type and product_facility_type)
+   - [IMP] Created form/tree views and added sub menu item under Inventory > Configuration > Products for Facility Type and Plan Type
+   - [IMP] Update SF Connector pulling of Products to include new fields (Facility Type and Plan Type)
+
 ## [13.0.1.1.3] - 2021-08-13
    - [IMP] Updated sf_type selection field values
 

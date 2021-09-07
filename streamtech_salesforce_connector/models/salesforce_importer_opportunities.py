@@ -20,7 +20,8 @@ class SalesForceImporterOpportunities(models.Model):
 
         sf = SalesForceConnect()
         self.sales_force = sf.connect_salesforce(self)
-        
+
+
         # if not self.sales_force:
         #     self.connect_to_salesforce()
 
