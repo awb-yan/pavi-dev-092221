@@ -57,6 +57,8 @@ class SaleSubscription(models.Model):
     def _provisioning(self, record):
 
         self.record = record
+        _logger.info(' === _provisioning ===')
+        _logger.info(record)
 
         self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
         self.record['in_progress'] = False
@@ -64,6 +66,10 @@ class SaleSubscription(models.Model):
         self.env.cr.commit()
 
     def _activation(self, record, max_retries):
+
+        _logger.info(' === activation ===')
+        _logger.info(record)
+
         for count in range(max_retries):
             if self._route_facility(record):
                 break
@@ -77,6 +83,7 @@ class SaleSubscription(models.Model):
 
     def _route_facility(self, record):
 
+        _logger.info(' === _route_facility ===')
         _logger.info(record)
 
         for line_id in record.recurring_invoice_line_ids:
@@ -119,6 +126,10 @@ class SaleSubscription(models.Model):
         #     return True
 
     def _activate(self, record):
+
+        _logger.info(' === _activate ===')
+        _logger.info(record)
+
         self.record = record;
         now = datetime.now().strftime("%Y-%m-%d")
         self.record.write({
@@ -130,6 +141,10 @@ class SaleSubscription(models.Model):
         # call SF API
 
     def _generate_atmref(self, vals):
+
+        _logger.info(' === _generate_atmref ===')
+        _logger.info(vals)
+
         company_id = vals.get('company_id')
         company = self.env['res.company'].browse([company_id])
 
