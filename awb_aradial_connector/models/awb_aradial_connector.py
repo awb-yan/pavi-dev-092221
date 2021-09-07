@@ -25,7 +25,7 @@ class AWBAradialConnector(models.Model):
             _logger.info(line_id)
             # if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
             # aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
-            product = line_id['name'].upper()
+            product = line_id[0]['name'].upper()
             # facility_type = line_id.product_id.product_tmpl_id.sf_facility_type            #TODO: for update to actual field name
             # plan_type = line_id.product_id.product_tmpl_id.sf_plan_type                    #TODO: for update to actual field name
         first_name = record.partner_id.first_name
