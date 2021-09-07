@@ -57,7 +57,7 @@ class SaleSubscription(models.Model):
 
         _logger.info(' === _generate_atmref ===')
         _logger.info(vals)
-
+        _logger.info(vals.get('opportunity_id'))
         self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals.get('opportunity_id'))])
         _logger.info(self.record)
 
