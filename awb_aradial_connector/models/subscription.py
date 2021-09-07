@@ -58,12 +58,12 @@ class Subscription(models.Model):
             )
         self.record = record
         
-        is_valid = self._validate_parameters(
-            record.subscriber_location_id,
-            record.atm_ref,
-            record.stage_id.name
-        )
-
+        # is_valid = self._validate_parameters(
+        #     record.subscriber_location_id,
+        #     record.atm_ref,
+        #     record.stage_id.name
+        # )
+        is_valid = True
         if is_valid:
             if record.aradial_product: #TODO: for update to actual field name
 
