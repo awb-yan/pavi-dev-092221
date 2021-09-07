@@ -90,11 +90,11 @@ class SaleSubscription(models.Model):
 
     def _route_facility(self, record):
         for line_id in record.recurring_invoice_line_ids:
-            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
-                aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
-                product = line_id.product_id.display_name.upper()
-                facility_type = line_id.product_id.product_tmpl_id.sf_facility_type.name            #TODO: for update to actual field name
-                plan_type = line_id.product_id.product_tmpl_id.sf_plan_type.name                    #TODO: for update to actual field name
+            # if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+            aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
+            product = line_id.product_id.display_name.upper()
+            facility_type = line_id.product_id.product_tmpl_id.sf_facility_type.name            #TODO: for update to actual field name
+            plan_type = line_id.product_id.product_tmpl_id.sf_plan_type.name                    #TODO: for update to actual field name
         first_name = record.partner_id.first_name
         last_name = record.partner_id.last_name
         if not first_name:
