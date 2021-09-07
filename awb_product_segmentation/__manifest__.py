@@ -21,7 +21,7 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.0.1',
+    'version': '13.0.1.1.1',
 
     'depends': ['sale_management', 'sale_subscription'],
 
