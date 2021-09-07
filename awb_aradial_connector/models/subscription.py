@@ -57,41 +57,42 @@ class Subscription(models.Model):
                 ("Record is required")
             )
         self.record = record
+        self.data = self._compose_aradial_payload(record)
         
         # is_valid = self._validate_parameters(
         #     record.subscriber_location_id,
         #     record.atm_ref,
         #     record.stage_id.name
         # )
-        is_valid = True
-        if is_valid:
-            if record.aradial_product: #TODO: for update to actual field name
 
-                self.data = self._compose_aradial_payload(record)
+        # if is_valid:
+        #     if record.aradial_product: #TODO: for update to actual field name
 
-                _logger.info("User Details:")
-                _logger.info("UserID: %s" % self.data['UserID'])
-                _logger.info("Offer: %s" % self.data['Offer'])
-                _logger.info("First Name: %s" % self.data['FirstName'])
-                _logger.info("Last Name: %s" % self.data['LastName'])
+        #         self.data = self._compose_aradial_payload(record)
 
-                for count in range(3):
-                    isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
+        #         _logger.info("User Details:")
+        #         _logger.info("UserID: %s" % self.data['UserID'])
+        #         _logger.info("Offer: %s" % self.data['Offer'])
+        #         _logger.info("First Name: %s" % self.data['FirstName'])
+        #         _logger.info("Last Name: %s" % self.data['LastName'])
 
-                    if isUserCreationSuccessful:
-                        self.now_date_time = self._successful_user_creation()
+        #         for count in range(3):
+        #             isUserCreationSuccessful = self.env['aradial.connector'].create_user(self.data)
 
-                        return self.now_date_time
-                    else:
-                        if count == 2:
-                            _logger.info("error user creation")
-                            # add to failure list
+        #             if isUserCreationSuccessful:
+        #                 self.now_date_time = self._successful_user_creation()
 
-            else:
-                self.record.write({
-                    'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
-                    'in_progress': True
-                })
+        #                 return self.now_date_time
+        #             else:
+        #                 if count == 2:
+        #                     _logger.info("error user creation")
+        #                     # add to failure list
+
+        #     else:
+        #         self.record.write({
+        #             'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
+        #             'in_progress': True
+        #         })
 
 
     def _validate_parameters(
@@ -122,34 +123,41 @@ class Subscription(models.Model):
         products = ""
 
         for line_id in record.recurring_invoice_line_ids:
-            products += line_id.product_id.display_name.upper()
-            facility_type = line_id.product_id.facility_type #TODO: for update to actual field name
-            plan_type = line_id.product_id.plan_type #TODO: for update to actual field name
+            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
+                product = line_id.product_id.display_name.upper()
+                facility_type = line_id.product_id.product_tmpl_id.sf_facility_type            #TODO: for update to actual field name
+                plan_type = line_id.product_id.product_tmpl_id.sf_plan_type                    #TODO: for update to actual field name
         first_name = record.partner_id.first_name
         last_name = record.partner_id.last_name
         if not first_name:
             first_name = record.partner_id.name
             last_name = ''
 
-        data = {
-            'UserID': record.opportunity_id.sms_id_username, #TODO: for update to actual field name
-            'Password': record.opportunity_id.sms_id_password, #TODO: for update to actual field name
-            'FirstName': first_name,
-            'LastName': last_name,
-            'Address1': record.partner_id.street,
-            'Address2': record.partner_id.street2,
-            'City': record.partner_id.city,
-            'State': record.partner_id.state_id.name,
-            'Country': record.partner_id.country_id.name,
-            'Zip': record.partner_id.zip,
-            'Offer': products,
-            'ServiceType': 'Internet',
-            'CustomInfo1': facility_type,
-            'CustomInfo2': plan_type,
-            'CustomInfo3': record.partner_id.customer_number,
-        }
+        # data = {
+        #     'UserID': record.opportunity_id.sms_id_username, #TODO: for update to actual field name
+        #     'Password': record.opportunity_id.sms_id_password, #TODO: for update to actual field name
+        #     'FirstName': first_name,
+        #     'LastName': last_name,
+        #     'Address1': record.partner_id.street,
+        #     'Address2': record.partner_id.street2,
+        #     'City': record.partner_id.city,
+        #     'State': record.partner_id.state_id.name,
+        #     'Country': record.partner_id.country_id.name,
+        #     'Zip': record.partner_id.zip,
+        #     'Offer': products,
+        #     'ServiceType': 'Internet',
+        #     'CustomInfo1': facility_type,
+        #     'CustomInfo2': plan_type,
+        #     'CustomInfo3': record.partner_id.customer_number,
+        # }
 
-        return data        
+        _logger.info(aradial_flag)
+        _logger.info(facility_type)
+        _logger.info(plan_type)
+
+
+        # return data        
 
     def _successful_user_creation(self):
 
