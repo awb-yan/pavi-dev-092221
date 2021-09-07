@@ -85,7 +85,7 @@ class SaleSubscription(models.Model):
 
 
         # if aradial_flag:
-        return self.env['aradial.connector'].create_user(self.data)
+        return self.env['aradial.connector'].create_user(record)
         # else:
         #     return True
 
