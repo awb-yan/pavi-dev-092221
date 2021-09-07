@@ -40,19 +40,39 @@ class SaleSubscription(models.Model):
         # Commenting this for now
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
-        _logger.info('vals')
+        # _logger.info('vals')
+        # _logger.info(vals)
+
+        # self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals['opportunity_id'])])
+        # _logger.info(self.record)
+
+        # # ----- SMS Code -----
+        # # PROVISIONING
+        # self._provisioning(self.record)
+
+        # # ACTIVATION
+        # max_retries = 3
+        # self._activation(self.record, max_retries)
+
+
+        _logger.info(' === _generate_atmref ===')
         _logger.info(vals)
 
-        self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals['opportunity_id'])])
+        self.record = self.env['sale.subscription'].search([('opportunity_id','=',vals.get('opportunity_id'))])
         _logger.info(self.record)
 
-        # ----- SMS Code -----
-        # PROVISIONING
-        self._provisioning(self.record)
+        company_id = vals.get('company_id')
+        company = self.env['res.company'].browse([company_id])
 
-        # ACTIVATION
-        max_retries = 3
-        self._activation(self.record, max_retries)
+        code_seq = company.company_code.filtered(
+            lambda code: code.is_active == True
+        )
+
+        if not code_seq:
+            raise UserError("No Active company code, Please check your company code settings")
+
+        vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
+
 
         res = super(SaleSubscription, self).create(vals)
         return res
