@@ -169,7 +169,7 @@ class SaleSubscription(models.Model):
         _logger.info('5')
 
         self.record.write({
-            'atm_ref_sequence': code._get_seq_count()
+            'atm_ref_sequence': code_seq[0]._get_seq_count()
         })
         _logger.info('6')
         # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
