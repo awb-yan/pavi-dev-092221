@@ -8,7 +8,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
-import datetime
+from datetime import datetime
 
 import logging
 
