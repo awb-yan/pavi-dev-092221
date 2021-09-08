@@ -143,10 +143,10 @@ class SaleSubscription(models.Model):
         self.record = record
         _logger.info('1')
         # company_id = vals.get('company_id')
-        company_id = self.record.company_id
-        _logger.info(company_id)
+        company = self.record.company_id
+        # _logger.info(company_id)
         _logger.info('2')
-        company = self.env['res.company'].search([('id', '=', company_id)])
+        # company = self.env['res.company'].search([('id', '=', company_id)])
         _logger.info('3')
         _logger.info(company)
 
