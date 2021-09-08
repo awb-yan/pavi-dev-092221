@@ -63,12 +63,13 @@ class SaleSubscription(models.Model):
         _logger.info(record)
         try:
             self._route_facility(record)
+            self._activate(record)
+            self._generate_atmref(record)
         except SystemError:
-            if max_retries > 0:
+            if max_retries > 1:
                 self._activation(record, max_retries-1)
-
-        self._activate(record)
-        self._generate_atmref(record)
+            else:
+                _logger.info('Add to Failed transaction log')
 
 
     def _route_facility(self, record):
