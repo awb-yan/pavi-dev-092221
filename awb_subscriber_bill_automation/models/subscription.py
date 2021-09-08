@@ -79,8 +79,10 @@ class SaleSubscription(models.Model):
 
         for count in range(max_retries):
             if self._route_facility(record):
+                _logger.info('_route_facility is TRUE')
                 break
             else:
+                _logger.info('_route_facility is FALSE')
                 if count == 2:
                     _logger.info('add to failed transaction log')
 
