@@ -49,8 +49,7 @@ class SaleSubscription(models.Model):
     def _provisioning(self, record):
 
         self.record = record
-        _logger.info(' === _provisioning ===')
-        _logger.info(record)
+        _logger.info(' === _provisioning() ===')
 
         self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
         self.record['in_progress'] = False
@@ -59,8 +58,7 @@ class SaleSubscription(models.Model):
 
     def _activation(self, record, max_retries):
 
-        _logger.info(' === activation ===')
-        _logger.info(record)
+        _logger.info(' === activation() ===')
         try:
             self._route_facility(record)
             self._activate(record)
@@ -114,18 +112,12 @@ class SaleSubscription(models.Model):
             'CustomInfo3': record.partner_id.customer_number
         }
 
-        _logger.info(facility_type)
-        _logger.info(aradial_flag)
-        _logger.info(product)
-        _logger.info(plan_type)
-
         if not self.env['aradial.connector'].create_user(self.data):
             raise SystemError
 
     def _activate(self, record):
 
-        _logger.info(' === _activate ===')
-        _logger.info(record)
+        _logger.info(' === _activate() ===')
 
         self.record = record;
         now = datetime.now().strftime("%Y-%m-%d")
@@ -139,40 +131,23 @@ class SaleSubscription(models.Model):
 
     def _generate_atmref(self, record):
 
-        _logger.info(' === _generate_atmref ===')
-        _logger.info(record)
+        _logger.info(' === _generate_atmref() ===')
         self.record = record
-        _logger.info('1')
         # company_id = vals.get('company_id')
         company = self.record.company_id
-        # _logger.info(company_id)
-        _logger.info('2')
         # company = self.env['res.company'].search([('id', '=', company_id)])
-        _logger.info('3')
-        _logger.info(company)
 
         code_seq = company.company_code.filtered(
             lambda code: code.is_active == True
         )
 
-        # code_seq = company.company_code
-
-        # _logger.info(code_seq)
-        # for code in code_seq:
-        #     if code.is_active:
-        #         break
-
-        # _logger.info(code)
-        _logger.info('4')
-
         if not code_seq:
             raise UserError("No Active company code, Please check your company code settings")
-        _logger.info('5')
 
         self.record.write({
             'atm_ref_sequence': code_seq[0]._get_seq_count()
         })
-        _logger.info('6')
+
         # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
 
     @api.depends("atm_ref_sequence")
