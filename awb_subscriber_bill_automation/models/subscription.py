@@ -141,20 +141,26 @@ class SaleSubscription(models.Model):
         _logger.info(' === _generate_atmref ===')
         _logger.info(record)
         self.record = record
+        _logger.info('1')
         # company_id = vals.get('company_id')
         company_id = self.record.company_id
+        _logger.info('2')
         company = self.env['res.company'].browse([company_id])
+        _logger.info('3')
 
         code_seq = company.company_code.filtered(
             lambda code: code.is_active == True
         )
+        _logger.info('4')
 
         if not code_seq:
             raise UserError("No Active company code, Please check your company code settings")
+        _logger.info('5')
 
         self.record.write({
             'atm_ref_sequence': code_seq[0]._get_seq_count()
         })
+        _logger.info('6')
         # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
 
     @api.depends("atm_ref_sequence")
