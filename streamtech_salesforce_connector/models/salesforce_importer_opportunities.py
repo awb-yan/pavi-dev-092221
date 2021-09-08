@@ -89,6 +89,11 @@ class SalesForceImporterOpportunities(models.Model):
                     Area_ODOO__c,
                     Business_Unit_Groups__c,
                     (SELECT SLA_Activation_Actual_End_Date__c FROM opportunity.Job_Orders__r),
+                    (SELECT 
+                        SLA_Activation_Actual_End_Date__c, 
+                        SMS_User_ID__c, SMS_Password__c 
+                    FROM 
+                        opportunity.Job_Orders__r),
                     (SELECT
                         PricebookEntryId, Product2Id, ProductCode,
                         Name, Device_Fee__c, Quantity,
@@ -222,6 +227,9 @@ class SalesForceImporterOpportunities(models.Model):
         if job_orders:
             for jo in job_orders.get('records', []):
                 contract_start_date = jo.get('SLA_Activation_Actual_End_Date__c', None)
+
+                sms_user_id = jo.get('SMS_User_ID__c', None)
+                sms_password = jo.get('SMS_Password__c', None)                
                 if contract_start_date and contract_term:
                     if isinstance(contract_start_date, int):
                         contract_start_date = datetime.datetime.fromtimestamp(contract_start_date/1000)
@@ -269,7 +277,9 @@ class SalesForceImporterOpportunities(models.Model):
             'subscription_status': subscription_status,
             'zone': zone.id,
             'company_id': zone.company_id.id,
-            'team_id': sales_team_id
+            'team_id': sales_team_id,
+            'jo_sms_id_username': sms_user_id,
+            'jo_sms_id_password': sms_password            
         }
 
         if contract_start_date and contract_end_date:

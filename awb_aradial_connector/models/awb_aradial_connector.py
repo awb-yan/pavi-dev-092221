@@ -13,7 +13,7 @@ class AWBAradialConnector(models.Model):
 
     def create_user(
         self, 
-        record
+        data
     ):
 
         _logger.info("Create User")
