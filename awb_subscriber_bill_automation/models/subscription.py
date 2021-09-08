@@ -150,9 +150,18 @@ class SaleSubscription(models.Model):
         _logger.info('3')
         _logger.info(company)
 
-        code_seq = company.company_code.filtered(
-            lambda code: code.is_active == True
-        )
+        # code_seq = company.company_code.filtered(
+        #     lambda code: code.is_active == True
+        # )
+
+        code_seq = company.company_code
+
+        _logger.info(code_seq)
+        for code in code_seq:
+            if code.is_active:
+                break
+
+        _logger.info(code)
         _logger.info('4')
 
         if not code_seq:
@@ -160,7 +169,7 @@ class SaleSubscription(models.Model):
         _logger.info('5')
 
         self.record.write({
-            'atm_ref_sequence': code_seq[0]._get_seq_count()
+            'atm_ref_sequence': code._get_seq_count()
         })
         _logger.info('6')
         # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
