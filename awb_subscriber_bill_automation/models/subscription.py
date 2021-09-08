@@ -146,22 +146,22 @@ class SaleSubscription(models.Model):
         company_id = self.record.company_id
         _logger.info(company_id)
         _logger.info('2')
-        company = self.env['res.company'].browse([company_id])
+        company = self.env['res.company'].search([('id', '=', company_id)])
         _logger.info('3')
         _logger.info(company)
 
-        # code_seq = company.company_code.filtered(
-        #     lambda code: code.is_active == True
-        # )
+        code_seq = company.company_code.filtered(
+            lambda code: code.is_active == True
+        )
 
-        code_seq = company.company_code
+        # code_seq = company.company_code
 
-        _logger.info(code_seq)
-        for code in code_seq:
-            if code.is_active:
-                break
+        # _logger.info(code_seq)
+        # for code in code_seq:
+        #     if code.is_active:
+        #         break
 
-        _logger.info(code)
+        # _logger.info(code)
         _logger.info('4')
 
         if not code_seq:
