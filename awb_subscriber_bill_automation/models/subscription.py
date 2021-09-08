@@ -41,72 +41,63 @@ class SaleSubscription(models.Model):
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
-        vals['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-        vals['in_progress'] = False
-
-        company_id = vals.get('company_id')
-        company = self.env['res.company'].browse([company_id])
-
-        code_seq = company.company_code.filtered(
-            lambda code: code.is_active == True
-        )
-
-        if not code_seq:
-            raise UserError("No Active company code, Please check your company code settings")
-
-        vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
+        self._provisioning (vals)
 
         res = super(SaleSubscription, self).create(vals)
         return res
     
-    # def _provisioning(self, record):
+    def _provisioning(self, record):
 
-    #     self.record = record
-    #     _logger.info(' === _provisioning ===')
-    #     _logger.info(record)
+        self.record = record
+        _logger.info(' === _provisioning ===')
+        _logger.info(record)
 
-    #     self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-    #     self.record['in_progress'] = False
+        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        self.record['in_progress'] = False
 
-    #     self.env.cr.commit()
+        self.env.cr.commit()
 
-    def _activation(self, record):
+    def _activation(self, record, max_retries):
 
         _logger.info(' === activation ===')
         _logger.info(record)
-
-        max_retries = 3
-
-        for count in range(max_retries):
-            if self._route_facility(record):
-                _logger.info('_route_facility is TRUE')
-                break
-            else:
-                _logger.info('_route_facility is FALSE')
-                if count == 2:
-                    _logger.info('add to failed transaction log')
+        try:
+            self._route_facility(record)
+        except SystemError:
+            if max_retries > 0:
+                self._activation(record, max_retries-1)
 
         self._activate(record)
-        # self._generate_atmref(record)
+        self._generate_atmref(record)
 
 
     def _route_facility(self, record):
 
         for line_id in record.recurring_invoice_line_ids:
             # if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
-            aradial_flag = line_id.product_id.product_tmpl_id.sf_facility_type.is_aradial_product
-            product = line_id.product_id.display_name.upper()
-            facility_type = line_id.product_id.product_tmpl_id.sf_facility_type.name            #TODO: for update to actual field name
-            plan_type = line_id.product_id.product_tmpl_id.sf_plan_type.name                    #TODO: for update to actual field name
+            main_plan = line_id.product_id.product_tmpl_id
+
+        aradial_flag = main_plan.sf_facility_type.is_aradial_product
+
+        if not aradial_flag:
+            return True
+
+        product = main_plan.default_code.upper()
+        facility_type = main_plan.sf_facility_type.name
+        plan_type = main_plan.sf_plan_type.name
+
+        # for Residential
         first_name = record.partner_id.first_name
         last_name = record.partner_id.last_name
-        if not first_name:
+
+        # for Corporate
+        if not first_name: 
             first_name = record.partner_id.name
             last_name = ''
 
         self.data = {
-            'UserID': record.opportunity_id.jo_sms_id_username,                #TODO: for update to actual field name
-            'Password': record.opportunity_id.jo_sms_id_password,              #TODO: for update to actual field name
+            'UserID': record.opportunity_id.jo_sms_id_username,
+            'Password': record.opportunity_id.jo_sms_id_password,
             'FirstName': first_name,
             'LastName': last_name,
             'Address1': record.partner_id.street,
@@ -127,10 +118,8 @@ class SaleSubscription(models.Model):
         _logger.info(product)
         _logger.info(plan_type)
 
-        if aradial_flag:
-            return self.env['aradial.connector'].create_user(self.data)
-        else:
-            return True
+        if not self.env['aradial.connector'].create_user(self.data):
+            raise SystemError
 
     def _activate(self, record):
 
