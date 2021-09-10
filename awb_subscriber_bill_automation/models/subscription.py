@@ -49,6 +49,7 @@ class SaleSubscription(models.Model):
 
     def _create(self, record):
         _logger.info('_create')
+        _logger.info(record)
         last_subscription = self._checkLastActiveSubscription(record)
 
         # SubsCreate = SubscriptionCreate()
