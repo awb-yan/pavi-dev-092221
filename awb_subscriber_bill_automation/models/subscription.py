@@ -9,7 +9,6 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-# from ..services.subscription_create import SubscriptionCreate
 
 import logging
 
@@ -36,295 +35,131 @@ class SaleSubscription(models.Model):
     atm_ref = fields.Char(string="ATM Reference", store=True, compute='_compute_atm_reference_number')
     atm_ref_sequence = fields.Char(string="ATM Reference Sequence", store=True)
 
-    state = fields.Char("State", compute='_get_stage_name')
-    product_names = fields.Char("Products", compute='_get_subs_product_names')
-    product_desc = fields.Char("Products Description", compute='_get_subs_product_names')
-
-
     @api.model
     def create(self, vals):
         # Commenting this for now
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
+        _logger.info(vals.get('id'));
         # self._provisioning (vals)
 
         res = super(SaleSubscription, self).create(vals)
         return res
+    
+    def _provisioning(self, record):
 
-    def _create(self, record):
-        last_subscription = self._checkLastActiveSubscription(record)
+        self.record = record
+        _logger.info(' === _provisioning() ===')
 
-        # SubsCreate = SubscriptionCreate()
-        # Provisioning New Subscription
-        newsubscription = self._provision_and_activate(self, record, last_subscription)
-        # Helper to update Odoo Opportunity
-        # Salesforce.update_opportunity(newsubscription)
+        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        self.record['in_progress'] = False
+
+        self.env.cr.commit()
+
+    def _activation(self, record, max_retries):
+
+        _logger.info(' === activation() ===')
+        
+        _logger.info(self._checkLastActiveSubscription (record))
+        # try:
+        #     self._route_facility(record)
+        #     self._activate(record)
+        #     self._generate_atmref(record)
+        # except SystemError:
+        #     if max_retries > 1:
+        #         self._activation(record, max_retries-1)
+        #     else:
+        #         _logger.info('Add to Failed transaction log')
+
 
     def _checkLastActiveSubscription(self, record):
         customer_id = record.customer_number
 
-        activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
-        if activeSubs.length() >= 2:
-            return activeSubs[0] 
-        else:
-            return False
+        lastActiveSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
+        _logger.info (lastActiveSubs)
+        return lastActiveSubs[0]
 
-    def provision_and_activate(self, record, last_subscription):
-        max_retries = 3
-        self.record = record
-        self._set_to_draft(record)
-        main_plan = self._get_mainplan(record)
-        plan_type = main_plan.sf_plan_type.name
-        aradial_flag = main_plan.sf_facility_type.is_aradial_product
-        
-        # plan type flow routing
-        if plan_type == 'Postpaid':
-            add_to_timebank = self._provision_postpaid(record, last_subscription)
-        else:
-            add_to_timebank = self._provision_prepaid(record, last_subscription)
-
-        # facility type routing
-        if not aradial_flag:
-            return True
-        else:
-            self._activate(self, record, main_plan, max_retries, add_to_timebank)
-       
-    # TODO: Yan - update Postpaid provisioning
-    def _provision_postpaid(self, record, last_subscription):
-        if(last_subscription is None):
-            _logger.info('first')
-            # Welcome Provisioning Notification
-        else:
-            _logger.info('last')
-            # Returning Subscriber Notification
-            # Check if still active, handle multiple active subs for postpaid
-        return True
-
-
-    def _provision_prepaid(self, record, last_subscription):
-        if not last_subscription:
-            _logger.info('first subs')
-            # Welcome Provisioning Notification
-        else:
-            # CTP Provisioning Notification
-            # Check if still active, query remaining days in aradial
-            # Kung derived, dapat may laman yung end date ng line item ta dun nalnag mag-minus
-            # kung galing Aradial, jusko paano?
-
-            remaining_days = self.env['aradial.connector'].get_remaining(last_subscription.sms_id.username)
-        
-        return remaining_days
-
-   
-    def _set_to_draft(self, record):
-        _logger.info(' === set_to_draft ===')
-        self.record = record
-
-        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-        self.record['in_progress'] = False
-        self.env.cr.commit()
-
-    def _get_mainplan(self, record):
-        _logger.info(' === get_mainplan ===')
+    def _route_facility(self, record):
 
         for line_id in record.recurring_invoice_line_ids:
-            # if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
-            main_plan = line_id.product_id.product_tmpl_id
+            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                main_plan = line_id.product_id.product_tmpl_id
 
-        return main_plan  
+        aradial_flag = main_plan.sf_facility_type.is_aradial_product
 
-    def _send_to_aradial(self, record, main_plan, max_retries, additional_days):
-        try:
-            # for Residential
-            first_name = record.partner_id.first_name
-            last_name = record.partner_id.last_name
+        if not aradial_flag:
+            return True
 
-            # for Corporate
-            if not first_name: 
-                first_name = record.partner_id.name
-                last_name = ''
+        product = main_plan.default_code.upper()
+        facility_type = main_plan.sf_facility_type.name
+        plan_type = main_plan.sf_plan_type.name
 
-            self.data = {
-                'UserID': record.opportunity_id.jo_sms_id_username,
-                'Password': record.opportunity_id.jo_sms_id_password,
-                'FirstName': first_name,
-                'LastName': last_name,
-                'Address1': record.partner_id.street,
-                'Address2': record.partner_id.street2,
-                'City': record.partner_id.city,
-                'State': record.partner_id.state_id.name,
-                'Country': record.partner_id.country_id.name,
-                'Zip': record.partner_id.zip,
-                'Offer': main_plan.default_code.upper(),
-                'ServiceType': 'Internet',
-                'CustomInfo1': main_plan.sf_facility_type.name,
-                'CustomInfo2': main_plan.sf_plan_type.name,
-                'CustomInfo3': record.partner_id.customer_number,
-                'CustomInfo4': record.code,
-                'TimeBank': additional_days * 86400, # get the seconds
-                'UseTimeBank': 1
-            }
+        # for Residential
+        first_name = record.partner_id.first_name
+        last_name = record.partner_id.last_name
 
-            if not self.env['aradial.connector'].create_user(self.data):
-                raise Exception
-        except:
-            if max_retries > 1:
-                self._send_to_aradial(record, main_plan, max_retries-1, additional_days)
-            else:
-                _logger.info('Add to Failed transaction log')
+        # for Corporate
+        if not first_name: 
+            first_name = record.partner_id.name
+            last_name = ''
 
-    def _start_subscription(self, record):
+        self.data = {
+            'UserID': record.opportunity_id.jo_sms_id_username,
+            'Password': record.opportunity_id.jo_sms_id_password,
+            'FirstName': first_name,
+            'LastName': last_name,
+            'Address1': record.partner_id.street,
+            'Address2': record.partner_id.street2,
+            'City': record.partner_id.city,
+            'State': record.partner_id.state_id.name,
+            'Country': record.partner_id.country_id.name,
+            'Zip': record.partner_id.zip,
+            'Offer': product,
+            'ServiceType': 'Internet',
+            'CustomInfo1': facility_type,
+            'CustomInfo2': plan_type,
+            'CustomInfo3': record.partner_id.customer_number
+        }
+
+        if not self.env['aradial.connector'].create_user(self.data):
+            raise SystemError
+
+    def _activate(self, record):
 
         _logger.info(' === _activate() ===')
 
-        try:
-            self.record = record;
-            now = datetime.now().strftime("%Y-%m-%d")
-            self.record.write({
-                'date_start': now,
-                'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
-                'in_progress': True
-            })
-        except:
-            _logger.error(f'Error encountered while starting subscription for {self.record.code}..')
+        self.record = record;
+        now = datetime.now().strftime("%Y-%m-%d")
+        self.record.write({
+            'date_start': now,
+            'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
+            'in_progress': True
+        })
+
+        # call SF API
 
 
     def _generate_atmref(self, record):
 
         _logger.info(' === _generate_atmref() ===')
-        try:
-            self.record = record
-            # company_id = vals.get('company_id')
-            company = self.record.company_id
-            # company = self.env['res.company'].search([('id', '=', company_id)])
+        self.record = record
+        # company_id = vals.get('company_id')
+        company = self.record.company_id
+        # company = self.env['res.company'].search([('id', '=', company_id)])
 
-            code_seq = company.company_code.filtered(
-                lambda code: code.is_active == True
-            )
+        code_seq = company.company_code.filtered(
+            lambda code: code.is_active == True
+        )
 
-            if not code_seq:
-                raise UserError("No Active company code, Please check your company code settings")
+        if not code_seq:
+            raise UserError("No Active company code, Please check your company code settings")
 
-            self.record.write({
-                'atm_ref_sequence': code_seq[0]._get_seq_count()
-            })
+        self.record.write({
+            'atm_ref_sequence': code_seq[0]._get_seq_count()
+        })
 
-            # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
-        except:
-            _logger.error('Error encountered while generating atm reference for subscription {self.record.code}..')
-
-    def _activate(self, record, main_plan, max_retries, add_to_timebank):
-        _logger.info(' === activation() ===')
-        self._send_to_aradial(record, main_plan, max_retries, add_to_timebank)
-        self._start_subscription(record)
-        self._generate_atmref(record)
-   
-
-
-    # def _provisioning(self, record):
-
-    #     self.record = record
-    #     _logger.info(' === _provisioning() ===')
-
-    #     self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-    #     self.record['in_progress'] = False
-
-    #     self.env.cr.commit()
-
-    # def _activation(self, record, max_retries):
-
-    #     _logger.info(' === activation() ===')
-    #     try:
-    #         self._route_facility(record)
-    #         self._activate(record)
-    #         self._generate_atmref(record)
-    #     except SystemError:
-    #         if max_retries > 1:
-    #             self._activation(record, max_retries-1)
-    #         else:
-    #             _logger.info('Add to Failed transaction log')
-
-    # def _route_facility(self, record):
-
-    #     for line_id in record.recurring_invoice_line_ids:
-    #         if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
-    #             main_plan = line_id.product_id.product_tmpl_id
-
-    #     aradial_flag = main_plan.sf_facility_type.is_aradial_product
-
-    #     if not aradial_flag:
-    #         return True
-
-    #     product = main_plan.default_code.upper()
-    #     facility_type = main_plan.sf_facility_type.name
-    #     plan_type = main_plan.sf_plan_type.name
-
-    #     # for Residential
-    #     first_name = record.partner_id.first_name
-    #     last_name = record.partner_id.last_name
-
-    #     # for Corporate
-    #     if not first_name: 
-    #         first_name = record.partner_id.name
-    #         last_name = ''
-
-    #     self.data = {
-    #         'UserID': record.opportunity_id.jo_sms_id_username,
-    #         'Password': record.opportunity_id.jo_sms_id_password,
-    #         'FirstName': first_name,
-    #         'LastName': last_name,
-    #         'Address1': record.partner_id.street,
-    #         'Address2': record.partner_id.street2,
-    #         'City': record.partner_id.city,
-    #         'State': record.partner_id.state_id.name,
-    #         'Country': record.partner_id.country_id.name,
-    #         'Zip': record.partner_id.zip,
-    #         'Offer': product,
-    #         'ServiceType': 'Internet',
-    #         'CustomInfo1': facility_type,
-    #         'CustomInfo2': plan_type,
-    #         'CustomInfo3': record.partner_id.customer_number
-    #     }
-
-    #     if not self.env['aradial.connector'].create_user(self.data):
-    #         raise SystemError
-
-    # def _activate(self, record):
-
-    #     _logger.info(' === _activate() ===')
-
-    #     self.record = record;
-    #     now = datetime.now().strftime("%Y-%m-%d")
-    #     self.record.write({
-    #         'date_start': now,
-    #         'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
-    #         'in_progress': True
-    #     })
-
-    #     # call SF API
-
-    # def _generate_atmref(self, record):
-
-    #     _logger.info(' === _generate_atmref() ===')
-    #     self.record = record
-    #     # company_id = vals.get('company_id')
-    #     company = self.record.company_id
-    #     # company = self.env['res.company'].search([('id', '=', company_id)])
-
-    #     code_seq = company.company_code.filtered(
-    #         lambda code: code.is_active == True
-    #     )
-
-    #     if not code_seq:
-    #         raise UserError("No Active company code, Please check your company code settings")
-
-    #     self.record.write({
-    #         'atm_ref_sequence': code_seq[0]._get_seq_count()
-    #     })
-
-    #     # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
-
+        # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
 
     @api.depends("atm_ref_sequence")
     def _compute_atm_reference_number(self):
@@ -612,171 +447,6 @@ class SaleSubscription(models.Model):
         else:
             self.date = False
 
-    @api.depends('stage_id')
-    def _get_stage_name(self):
-        for rec in self:
-            rec.state = rec.stage_id.name
-
-    @api.depends('recurring_invoice_line_ids')
-    def _get_subs_product_names(self):
-        products = []
-        desc = []
-        for rec in self:
-            for line_item in rec.recurring_invoice_line_ids:
-                if line_item.product_id.type == 'service':
-                    products.append(line_item.display_name)
-                    desc.append(line_item.name)  # description
-                    desc.append(str(line_item.quantity))
-                    if line_item.date_start:
-                        desc.append(line_item.date_start.strftime("%b %d, %Y"))
-            rec.product_names = ', '.join(products)
-            rec.product_desc = ', '.join(desc)
-
-    def _get_discon_type(self, discon_type, channel):
-        types = {
-            "sysv": {
-                "sf": "System, Voluntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-            "sysi_expiry": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Promo Expiry",
-                "function": "_change_status_subtype"
-            },
-            "sysi_bandwidth": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Bandwidth UsageExceeded",
-                "function": "_change_status_subtype"
-            },
-            "sysi_nonpayment": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyi_nonpayment": {
-                "sf": "Physical, Involuntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyv": {
-                "sf": "Physical, Voluntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-        }
-
-        discon_type = types.get(discon_type)
-        if discon_type:
-            value = discon_type.get(channel)
-            if value:
-                return {
-                    "status": value,
-                    "description": discon_type.get("desc"),
-                    "executable": discon_type.get("function")
-                }
-
-        return False
-
-    def _change_status_subtype(self, records, status):
-        records.write(
-            {"subscription_status_subtype": status}
-        )
-
-    @api.depends('stage_id')
-    def _get_stage_name(self):
-        for rec in self:
-            rec.state = rec.stage_id.name
-
-    @api.depends('recurring_invoice_line_ids')
-    def _get_subs_product_names(self):
-        products = []
-        desc = []
-        for rec in self:
-            for line_item in rec.recurring_invoice_line_ids:
-                if line_item.product_id.type == 'service':
-                    products.append(line_item.display_name)
-                    desc.append(line_item.name)  # description
-                    desc.append(str(line_item.quantity))
-                    if line_item.date_start:
-                        desc.append(line_item.date_start.strftime("%b %d, %Y"))
-            rec.product_names = ', '.join(products)
-            rec.product_desc = ', '.join(desc)
-
-    def _get_discon_type(self, discon_type, channel):
-        types = {
-            "sysv": {
-                "sf": "System, Voluntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-            "sysi_expiry": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Promo Expiry",
-                "function": "_change_status_subtype"
-            },
-            "sysi_bandwidth": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Bandwidth UsageExceeded",
-                "function": "_change_status_subtype"
-            },
-            "sysi_nonpayment": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyi_nonpayment": {
-                "sf": "Physical, Involuntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyv": {
-                "sf": "Physical, Voluntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-        }
-
-        discon_type = types.get(discon_type)
-        if discon_type:
-            value = discon_type.get(channel)
-            if value:
-                return {
-                    "status": value,
-                    "description": discon_type.get("desc"),
-                    "executable": discon_type.get("function")
-                }
-
-        return False
-
-    def _change_status_subtype(self, records, status):
-        records.write(
-            {"subscription_status_subtype": status}
-        )
 
 class SaleSubscriptionLine(models.Model):
     _inherit = "sale.subscription.line"
