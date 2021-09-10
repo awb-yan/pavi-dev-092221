@@ -64,7 +64,7 @@ class SaleSubscription(models.Model):
         customer_id = record.customer_number
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
-        if activeSubs.length() >= 2:
+        if len(activeSubs) >= 2:
             return activeSubs[0] 
         else:
             return False
