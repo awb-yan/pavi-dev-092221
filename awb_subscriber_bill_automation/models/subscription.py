@@ -60,16 +60,25 @@ class SaleSubscription(models.Model):
     def _activation(self, record, max_retries):
 
         _logger.info(' === activation() ===')
-        try:
-            self._route_facility(record)
-            self._activate(record)
-            self._generate_atmref(record)
-        except SystemError:
-            if max_retries > 1:
-                self._activation(record, max_retries-1)
-            else:
-                _logger.info('Add to Failed transaction log')
+        
+        _logger.info(self._checkLastActiveSubscription (record))
+        # try:
+        #     self._route_facility(record)
+        #     self._activate(record)
+        #     self._generate_atmref(record)
+        # except SystemError:
+        #     if max_retries > 1:
+        #         self._activation(record, max_retries-1)
+        #     else:
+        #         _logger.info('Add to Failed transaction log')
 
+
+    def _checkLastActiveSubscription(self, record):
+        customer_id = record.customer_number
+
+        lastActiveSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
+        _logger.info (lastActiveSubs)
+        return lastActiveSubs[0]
 
     def _route_facility(self, record):
 
