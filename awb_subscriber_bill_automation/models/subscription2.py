@@ -64,7 +64,7 @@ class SaleSubscription(models.Model):
         # Provisioning New Subscription
         newsubscription = SubsCreate._provision_and_activate(self, record, last_subscription)
         # Helper to update Odoo Opportunity
-        Salesforce.update_opportunity(newsubscription)
+        # Salesforce.update_opportunity(newsubscription)
 
        
     # @api.model
