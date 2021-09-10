@@ -86,7 +86,7 @@ class SaleSubscription(models.Model):
 
         # facility type routing
         if aradial_flag:
-            self._activate(self, record, main_plan, max_retries, add_to_timebank)
+            self._activate(record, main_plan, max_retries, add_to_timebank)
 
         self._start_subscription(record)
         self._generate_atmref(record)
