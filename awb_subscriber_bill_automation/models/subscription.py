@@ -111,6 +111,7 @@ class SaleSubscription(models.Model):
     def _provision_prepaid(self, record, last_subscription):
         _logger.info('provision prepaid')
         
+        remaining_days = 0
         if not last_subscription:
             _logger.info('first subs')
             # Welcome Provisioning Notification
