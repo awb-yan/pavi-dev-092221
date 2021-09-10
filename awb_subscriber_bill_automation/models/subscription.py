@@ -48,7 +48,7 @@ class SaleSubscription(models.Model):
         res = super(SaleSubscription, self).create(vals)
         return res
 
-    def _create(self, record):
+    def _ctp(self, record):
         _logger.info('_create')
         _logger.info(record)
         last_subscription = self._checkLastActiveSubscription(record)
@@ -61,7 +61,7 @@ class SaleSubscription(models.Model):
 
     def _checkLastActiveSubscription(self, record):
         _logger.info('checkLastActiveSubs')
-        customer_id = record.partner_id
+        customer_id = record.stored.partner_id
 
         activeSubs = self.env['sale.subscription'].search([('partner_id','=', customer_id),('subscription_status', '=', 'new')])
         if activeSubs.length() >= 2:
