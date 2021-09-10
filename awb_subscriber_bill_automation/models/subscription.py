@@ -62,11 +62,15 @@ class SaleSubscription(models.Model):
     def _checkLastActiveSubscription(self, record):
         _logger.info('checkLastActiveSubs')
         customer_id = record.customer_number
+        _logger.info(customer_id)
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
+        _logger.info(activeSubs)
         if len(activeSubs) >= 2:
+            _logger.info('2 or more')
             return activeSubs[0] 
         else:
+            _logger.info('1 sub')
             return False
 
     def _provision_and_activate(self, record, last_subscription):
