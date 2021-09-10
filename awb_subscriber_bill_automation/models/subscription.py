@@ -69,7 +69,7 @@ class SaleSubscription(models.Model):
         else:
             return False
 
-    def provision_and_activate(self, record, last_subscription):
+    def _provision_and_activate(self, record, last_subscription):
         _logger.info('provision and activation')
         max_retries = 3
         self.record = record
