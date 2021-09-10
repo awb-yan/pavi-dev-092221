@@ -41,7 +41,8 @@ class SaleSubscription(models.Model):
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
-        self._provisioning (vals)
+        _logger.info(vals);
+        # self._provisioning (vals)
 
         res = super(SaleSubscription, self).create(vals)
         return res
@@ -73,8 +74,8 @@ class SaleSubscription(models.Model):
     def _route_facility(self, record):
 
         for line_id in record.recurring_invoice_line_ids:
-            # if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
-            main_plan = line_id.product_id.product_tmpl_id
+            if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                main_plan = line_id.product_id.product_tmpl_id
 
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
 
@@ -128,6 +129,7 @@ class SaleSubscription(models.Model):
         })
 
         # call SF API
+
 
     def _generate_atmref(self, record):
 
