@@ -61,9 +61,9 @@ class SaleSubscription(models.Model):
 
     def _checkLastActiveSubscription(self, record):
         _logger.info('checkLastActiveSubs')
-        customer_id = record.stored.partner_id
+        customer_id = record.customer_number
 
-        activeSubs = self.env['sale.subscription'].search([('partner_id','=', customer_id),('subscription_status', '=', 'new')])
+        activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
         if activeSubs.length() >= 2:
             return activeSubs[0] 
         else:
