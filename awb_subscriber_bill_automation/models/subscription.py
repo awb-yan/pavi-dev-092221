@@ -48,6 +48,7 @@ class SaleSubscription(models.Model):
         return res
 
     def _create(self, record):
+        _logger.info('_create')
         last_subscription = self._checkLastActiveSubscription(record)
 
         # SubsCreate = SubscriptionCreate()
@@ -57,6 +58,7 @@ class SaleSubscription(models.Model):
         # Salesforce.update_opportunity(newsubscription)
 
     def _checkLastActiveSubscription(self, record):
+        _logger.info('checkLastActiveSubs')
         customer_id = record.customer_number
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '=', 'new')])
@@ -66,6 +68,7 @@ class SaleSubscription(models.Model):
             return False
 
     def provision_and_activate(self, record, last_subscription):
+        _logger.info('provision and activation')
         max_retries = 3
         self.record = record
         self._set_to_draft(record)
@@ -80,10 +83,12 @@ class SaleSubscription(models.Model):
             add_to_timebank = self._provision_prepaid(record, last_subscription)
 
         # facility type routing
-        if not aradial_flag:
-            return True
-        else:
+        if aradial_flag:
             self._activate(self, record, main_plan, max_retries, add_to_timebank)
+
+        self._start_subscription(record)
+        self._generate_atmref(record)
+            
        
     # TODO: Yan - update Postpaid provisioning
     def _provision_postpaid(self, record, last_subscription):
@@ -98,6 +103,8 @@ class SaleSubscription(models.Model):
 
 
     def _provision_prepaid(self, record, last_subscription):
+        _logger.info('provision prepaid')
+        
         if not last_subscription:
             _logger.info('first subs')
             # Welcome Provisioning Notification
@@ -130,6 +137,7 @@ class SaleSubscription(models.Model):
         return main_plan  
 
     def _send_to_aradial(self, record, main_plan, max_retries, additional_days):
+        _logger.info('send to aradial')
         try:
             # for Residential
             first_name = record.partner_id.first_name
@@ -155,7 +163,7 @@ class SaleSubscription(models.Model):
                 'ServiceType': 'Internet',
                 'CustomInfo1': main_plan.sf_facility_type.name,
                 'CustomInfo2': main_plan.sf_plan_type.name,
-                'CustomInfo3': record.partner_id.customer_number,
+                'CustomInfo3': record.customer_number,
                 'CustomInfo4': record.code,
                 'TimeBank': additional_days * 86400, # get the seconds
                 'UseTimeBank': 1
@@ -171,7 +179,7 @@ class SaleSubscription(models.Model):
 
     def _start_subscription(self, record):
 
-        _logger.info(' === _activate() ===')
+        _logger.info(' === start subs ===')
 
         try:
             self.record = record;
@@ -210,10 +218,8 @@ class SaleSubscription(models.Model):
             _logger.error('Error encountered while generating atm reference for subscription {self.record.code}..')
 
     def _activate(self, record, main_plan, max_retries, add_to_timebank):
-        _logger.info(' === activation() ===')
+        _logger.info(' === activate ===')
         self._send_to_aradial(record, main_plan, max_retries, add_to_timebank)
-        self._start_subscription(record)
-        self._generate_atmref(record)
            
     # def _provisioning(self, record):
 
