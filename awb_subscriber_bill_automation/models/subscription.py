@@ -41,7 +41,8 @@ class SaleSubscription(models.Model):
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
-        # _logger.info(vals.get('id'));
+        _logger.info('create')
+        _logger.info(vals)
         # self._provisioning (vals)
 
         res = super(SaleSubscription, self).create(vals)
