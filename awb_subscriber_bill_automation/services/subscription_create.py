@@ -51,7 +51,7 @@ class SubscriptionCreate(models.Model):
             _logger.info('last')
             # Returning Subscriber Notification
             # Check if still active, handle multiple active subs for postpaid
-        return True
+        return 0
 
 
     def _provision_prepaid(self, record, last_subscription):
@@ -61,7 +61,7 @@ class SubscriptionCreate(models.Model):
             _logger.info('first subs')
             remaining_seconds = 0
             # Welcome Provisioning Notification
-            self._send_welcome_message(recordset=record, template_name="Subscription Welcome Notification", state="In Progress")
+            # self._send_welcome_message(recordset=record, template_name="Subscription Welcome Notification", state="In Progress")
         else:
             # CTP Provisioning Notification
             # Check if still active, query remaining days in aradial
