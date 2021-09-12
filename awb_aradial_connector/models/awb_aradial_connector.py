@@ -1,4 +1,5 @@
 from ..api.aradial_gateway.create_user import AradialAPIGatewayCreateUser
+from ..api.aradial_gateway.get_user import AradialAPIGatewayGetUser
 from odoo import api, fields, models, exceptions, _
 from psycopg2.extensions import AsIs
 import datetime
@@ -53,7 +54,7 @@ class AWBAradialConnector(models.Model):
 
         _logger.info("Calling Get User API %s" % aradial_url)
         
-        user = AradialAPIGateway(
+        user = AradialAPIGatewayGetUser(
             url=aradial_url,
             username=aradial_username,
             password=aradial_password
