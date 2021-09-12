@@ -47,3 +47,23 @@ class AradialAPIGateway(object):
 
 
         return state
+    
+    def get_user(self, sms_id_username):
+
+        try:
+            res = requests.get(
+                url=self.url + "/" + sms_id_username,
+                auth=HTTPBasicAuth(self.username, self.password)
+            )
+        except requests.exceptions.MissingSchema as e:
+            raise exceptions.ValidationError(e)
+
+        _logger.info("==== getUser Response ====")
+        _logger.info(res.json())
+
+        if res.status_code == 200:
+
+            response = res.json()
+            return response['TimeBank']
+        else:
+            return 0

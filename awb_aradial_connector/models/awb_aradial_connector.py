@@ -23,7 +23,7 @@ class AWBAradialConnector(models.Model):
         aradial_username = params.get_param('aradial_username')
         aradial_password = params.get_param('aradial_password')
 
-        _logger.info("Calling API %s" % aradial_url)
+        _logger.info("Calling Create User API %s" % aradial_url)
         
         user = AradialAPIGateway(
             url=aradial_url,
@@ -39,4 +39,28 @@ class AWBAradialConnector(models.Model):
             return True
         else:
             return False
+
+    def get_remaining_time(
+        self, 
+        sms_id_username
+    ):
+        _logger.info("Get Remaining Time")
+
+        params = self.env['ir.config_parameter'].sudo()
+        aradial_url = params.get_param('aradial_url')
+        aradial_username = params.get_param('aradial_username')
+        aradial_password = params.get_param('aradial_password')
+
+        _logger.info("Calling Get User API %s" % aradial_url)
+        
+        user = AradialAPIGateway(
+            url=aradial_url,
+            username=aradial_username,
+            password=aradial_password
+        )
+        timebank = user.get_user(sms_id_username)
+
+        # _logger.info("User Creation: %s" % created_user)
+
+        return timebank        
     
