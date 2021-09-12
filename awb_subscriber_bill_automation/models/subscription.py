@@ -9,7 +9,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-from ..services.subscription_create import SubscriptionCreate
+# from ..services.subscription_create import SubscriptionCreate
 
 import logging
 
@@ -54,9 +54,9 @@ class SaleSubscription(models.Model):
         main_plan = self._get_mainplan(record)
         last_subscription = self._checkLastActiveSubscription(record, main_plan)
 
-        SubsCreate = SubscriptionCreate()
+        # SubsCreate = SubscriptionCreate()
         # Provisioning New Subscription
-        SubsCreate.provision_and_activate(record, main_plan, last_subscription)
+        self.env['sale.subscription'].provision_and_activate(record, main_plan, last_subscription)
         # Helper to update Odoo Opportunity
         # Salesforce.update_opportunity(newsubscription)
 
