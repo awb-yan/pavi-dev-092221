@@ -56,7 +56,7 @@ class SaleSubscription(models.Model):
 
         # SubsCreate = SubscriptionCreate()
         # Provisioning New Subscription
-        self.env['sale.subscription'].provision_and_activate(record, main_plan, last_subscription)
+        self.env['sale.subscription'].provision_and_activation(record, main_plan, last_subscription)
         # Helper to update Odoo Opportunity
         # Salesforce.update_opportunity(newsubscription)
 

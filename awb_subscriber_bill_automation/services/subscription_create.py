@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
-    def provision_and_activate(self, record, main_plan, last_subscription):
+    def provision_and_activation(self, record, main_plan, last_subscription):
         _logger.info('provision and activation')
 
         max_retries = 3
@@ -102,7 +102,6 @@ class SubscriptionCreate(models.Model):
                 'FirstName': first_name,
                 'LastName': last_name,
                 'ServiceType': 'Internet',
-                # if the current subscription still has remaining time/days left
                 'TimeBank': additional_time, # get the seconds
                 'UseTimeBank': 1
             }
