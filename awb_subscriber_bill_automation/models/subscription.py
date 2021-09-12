@@ -9,7 +9,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-# from ..services.subscription_create import SubscriptionCreate
+from ..api.client.sf_updateaccount import Salesforce
 
 import logging
 
@@ -58,7 +58,8 @@ class SaleSubscription(models.Model):
         # Provisioning New Subscription
         self.env['sale.subscription'].provision_and_activation(record, main_plan, last_subscription)
         # Helper to update Odoo Opportunity
-        # Salesforce.update_opportunity(newsubscription)
+        sf = Salesforce()
+        sf.update_opportunity(record)
 
         # CTP flow for prepaid, 
         # if(last_subscription && newsubscription.opportunity_id is None)

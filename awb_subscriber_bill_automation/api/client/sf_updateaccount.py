@@ -5,7 +5,7 @@ from odoo import exceptions
 import logging
 
 
-class SFUpdateOpportunity(models.Model):
+class Salesforce(models.Model):
     _inherit = "sale.subscription"
 
     def update_opportunity(self, record):
