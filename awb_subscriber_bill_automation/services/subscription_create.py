@@ -106,6 +106,8 @@ class SubscriptionCreate(models.Model):
                 'UseTimeBank': 1
             }
 
+            _logger.info(self.data)
+
             if not self.env['aradial.connector'].create_user(self.data):
                 raise Exception
         except:
