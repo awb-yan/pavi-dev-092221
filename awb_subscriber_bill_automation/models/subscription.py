@@ -42,27 +42,25 @@ class SaleSubscription(models.Model):
         # Commenting this for now
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
-
-        # self._provisioning (vals)
-        # _logger.info('create')
-        # _logger.info(vals)
-        # invoice_lines = vals['recurring_invoice_line_ids']
-        # for lines in invoice_lines:
-        #     a, b, c = lines
-        #     _logger.info(a)
-        #     _logger.info(b)
-        #     _logger.info(c['name'])
-        # jason = json.dumps(vals)
-        # _logger.info(jason)
-        # ccc = json.dumps(c)
-        # _logger.info(ccc)
-
-
-
         res = super(SaleSubscription, self).create(vals)
 
         _logger.info('create')
-        _logger.info(res)
+        self.record = res
+        main_plan = self._get_mainplan(self.record)
+        last_subscription = self._checkLastActiveSubscription(self.record, main_plan)
+
+        # SubsCreate = SubscriptionCreate()
+        # Provisioning New Subscription
+        self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
+        # Helper to update Odoo Opportunity
+        # sf = Salesforce()
+        # sf.update_opportunity(record)
+
+        # CTP flow for prepaid, 
+        # if(last_subscription && newsubscription.opportunity_id is None)
+        #     SubsDiscon.disconnect(last_subscription)
+        #     # Helper to update Odoo Opportunity
+        #     Salesforce.update_opportunity(last_subscription)
 
         return res
 
