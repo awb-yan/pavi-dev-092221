@@ -65,25 +65,25 @@ class SaleSubscription(models.Model):
 
         return res
 
-    def _create(self, record):
-        _logger.info('_create')
-        _logger.info(record)
+    # def _create(self, record):
+    #     _logger.info('_create')
+    #     _logger.info(record)
 
-        main_plan = self._get_mainplan(record)
-        last_subscription = self._checkLastActiveSubscription(record, main_plan)
+    #     main_plan = self._get_mainplan(record)
+    #     last_subscription = self._checkLastActiveSubscription(record, main_plan)
 
-        # SubsCreate = SubscriptionCreate()
-        # Provisioning New Subscription
-        self.env['sale.subscription'].provision_and_activation(record, main_plan, last_subscription)
-        # Helper to update Odoo Opportunity
-        # sf = Salesforce()
-        # sf.update_opportunity(record)
+    #     # SubsCreate = SubscriptionCreate()
+    #     # Provisioning New Subscription
+    #     self.env['sale.subscription'].provision_and_activation(record, main_plan, last_subscription)
+    #     # Helper to update Odoo Opportunity
+    #     # sf = Salesforce()
+    #     # sf.update_opportunity(record)
 
-        # CTP flow for prepaid, 
-        # if(last_subscription && newsubscription.opportunity_id is None)
-        #     SubsDiscon.disconnect(last_subscription)
-        #     # Helper to update Odoo Opportunity
-        #     Salesforce.update_opportunity(last_subscription)
+    #     # CTP flow for prepaid, 
+    #     # if(last_subscription && newsubscription.opportunity_id is None)
+    #     #     SubsDiscon.disconnect(last_subscription)
+    #     #     # Helper to update Odoo Opportunity
+    #     #     Salesforce.update_opportunity(last_subscription)
 
     def _get_mainplan(self, record):
         _logger.info(' === get_mainplan ===')
