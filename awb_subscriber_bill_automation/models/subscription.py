@@ -44,22 +44,24 @@ class SaleSubscription(models.Model):
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
         # self._provisioning (vals)
-        _logger.info('create')
-        _logger.info(vals)
-        invoice_lines = vals['recurring_invoice_line_ids']
-        for lines in invoice_lines:
-            a, b, c = lines
-            _logger.info(a)
-            _logger.info(b)
-            _logger.info(c['name'])
-        jason = json.dumps(vals)
-        _logger.info(jason)
-        ccc = json.dumps(c)
-        _logger.info(ccc)
+        # _logger.info('create')
+        # _logger.info(vals)
+        # invoice_lines = vals['recurring_invoice_line_ids']
+        # for lines in invoice_lines:
+        #     a, b, c = lines
+        #     _logger.info(a)
+        #     _logger.info(b)
+        #     _logger.info(c['name'])
+        # jason = json.dumps(vals)
+        # _logger.info(jason)
+        # ccc = json.dumps(c)
+        # _logger.info(ccc)
 
 
 
         res = super(SaleSubscription, self).create(vals)
+
+        _logger.info(res)
         return res
 
     def _create(self, record):
