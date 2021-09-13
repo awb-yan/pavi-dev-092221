@@ -114,8 +114,8 @@ class SubscriptionCreate(models.Model):
             if max_retries > 1:
                 self._send_to_aradial(record, main_plan, max_retries-1, additional_time)
             else:
-                _logger.error(f'Add to Failed transaction log - {record.id}')
-                raise Exception
+                _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
+                raise Exception(f'Error Creating user in Aradial for {record.code}')
 
 
     def _start_subscription(self, record, max_retries):
@@ -135,6 +135,7 @@ class SubscriptionCreate(models.Model):
                 self._start_subscription(record, max_retries-1)
             else:
                 _logger.error(f'Error encountered while starting subscription for {self.record.code}..')
+                raise Exception(f'Error encountered while starting subscription for {self.record.code}..')
 
 
     def generate_atmref(self, record, max_retries):
@@ -160,4 +161,5 @@ class SubscriptionCreate(models.Model):
                 self._generate_atmref(record, max_retries-1)
             else:
                 _logger.error(f'Error encountered while generating atm reference for subscription {self.record.code}..')
+                raise Exception(f'Error encountered while generating atm reference for subscription {self.record.code}..')
 
