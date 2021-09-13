@@ -50,7 +50,7 @@ class SaleSubscription(models.Model):
             a, b, c = lines
             _logger.info(a)
             _logger.info(b)
-            _logger.info(c)
+            _logger.info(c['name'])
 
         res = super(SaleSubscription, self).create(vals)
         return res
