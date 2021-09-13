@@ -51,7 +51,7 @@ class SubscriptionCreate(models.Model):
         else:
             _logger.info('last')
             # Returning Subscriber Notification
-            # Check if still active, handle multiple active subs for postpaid
+
         return 0
 
 
@@ -78,6 +78,7 @@ class SubscriptionCreate(models.Model):
         self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
         self.record['in_progress'] = False
         self.env.cr.commit()
+        
 
     def _send_to_aradial(self, record, main_plan, max_retries, additional_time):
         _logger.info('send to aradial')
