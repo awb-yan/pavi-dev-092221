@@ -53,7 +53,11 @@ class SaleSubscription(models.Model):
             _logger.info(b)
             _logger.info(c['name'])
         jason = json.dumps(vals)
-        _logger.info(json)
+        _logger.info(jason)
+        ccc = json.dumps(c)
+        _logger.info(ccc)
+
+
 
         res = super(SaleSubscription, self).create(vals)
         return res
