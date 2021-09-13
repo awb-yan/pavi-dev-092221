@@ -47,7 +47,7 @@ class SaleSubscription(models.Model):
         _logger.info(vals)
         invoice_lines = vals['recurring_invoice_line_ids']
         for lines in invoice_lines:
-            _logger.info(lines)
+            _logger.info(lines.name)
 
         res = super(SaleSubscription, self).create(vals)
         return res
