@@ -98,7 +98,7 @@ class SubscriptionCreate(models.Model):
                 'CustomInfo2': record.subscriber_location_id.name,  # zone
                 'CustomInfo3': record.customer_number,          # customer_id
                 'Offer': main_plan.default_code.upper(),
-                'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),                 # subscription start date
+                # 'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),                 # subscription start date
                 'Status': 0,                                    # 0 – Active, 1 – Canceled, 2 – Pending, 3 – Suspended
                 'FirstName': first_name,
                 'LastName': last_name,
