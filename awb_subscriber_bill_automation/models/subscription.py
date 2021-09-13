@@ -58,8 +58,8 @@ class SaleSubscription(models.Model):
         # Provisioning New Subscription
         self.env['sale.subscription'].provision_and_activation(record, main_plan, last_subscription)
         # Helper to update Odoo Opportunity
-        sf = Salesforce()
-        sf.update_opportunity(record)
+        # sf = Salesforce()
+        # sf.update_opportunity(record)
 
         # CTP flow for prepaid, 
         # if(last_subscription && newsubscription.opportunity_id is None)
