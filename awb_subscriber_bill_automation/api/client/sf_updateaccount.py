@@ -1,6 +1,6 @@
 import json
 import requests
-from odoo import exceptions
+from odoo import exceptions,models
 
 import logging
 
