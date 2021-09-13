@@ -28,22 +28,29 @@ class SubscriptionCreate(models.Model):
         plan_type = main_plan.sf_plan_type.name
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
-        # plan type flow routing
+        # Plan Type Flow routing
         if plan_type == 'Postpaid':
             add_to_timebank = self._provision_postpaid(record, last_subscription)
         else:
             add_to_timebank = self._provision_prepaid(record, last_subscription)
 
-        # facility type routing
+        # Facility Type routing
         if aradial_flag:
-            self._activate(record, main_plan, max_retries, add_to_timebank)
+            self._send_to_aradial(record, main_plan, max_retries, add_to_timebank)
 
+        self._start_subscription(record, max_retries)
 
-        self._start_subscription(record)
-        self._generate_atmref(record)
-            
        
-    # TODO: Yan - update Postpaid provisioning
+    def _set_to_draft(self, record):
+        _logger.info(' === set_to_draft ===')
+        self.record = record
+
+        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
+        self.record['in_progress'] = False
+        self.env.cr.commit()
+
+
+    # TODO: update Postpaid provisioning
     def _provision_postpaid(self, record, last_subscription):
         if not last_subscription:
             _logger.info('first')
@@ -71,15 +78,6 @@ class SubscriptionCreate(models.Model):
         return remaining_seconds
 
    
-    def _set_to_draft(self, record):
-        _logger.info(' === set_to_draft ===')
-        self.record = record
-
-        self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
-        self.record['in_progress'] = False
-        self.env.cr.commit()
-        
-
     def _send_to_aradial(self, record, main_plan, max_retries, additional_time):
         _logger.info('send to aradial')
         try:
@@ -95,16 +93,16 @@ class SubscriptionCreate(models.Model):
             self.data = {
                 'UserID': record.opportunity_id.jo_sms_id_username,
                 'Password': record.opportunity_id.jo_sms_id_password,
-                'CustomInfo1': record.code,                         # subscription_ code
-                'CustomInfo2': record.subscriber_location_id.name,  # zone
-                'CustomInfo3': record.customer_number,          # customer_id
+                'CustomInfo1': record.code,
+                'CustomInfo2': record.subscriber_location_id.name,
+                'CustomInfo3': record.customer_number,
                 'Offer': main_plan.default_code.upper(),
-                # 'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),                 # subscription start date
-                'Status': 0,                                    # 0 – Active, 1 – Canceled, 2 – Pending, 3 – Suspended
+                'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
+                'Status': 0,
                 'FirstName': first_name,
                 'LastName': last_name,
                 'ServiceType': 'Internet',
-                'TimeBank': additional_time, # get the seconds
+                'TimeBank': additional_time,
                 'UseTimeBank': 1
             }
 
@@ -116,10 +114,11 @@ class SubscriptionCreate(models.Model):
             if max_retries > 1:
                 self._send_to_aradial(record, main_plan, max_retries-1, additional_time)
             else:
-                _logger.info('Add to Failed transaction log')
-                #throw another exception
+                _logger.error(f'Add to Failed transaction log - {record.id}')
+                raise Exception
 
-    def _start_subscription(self, record):
+
+    def _start_subscription(self, record, max_retries):
 
         _logger.info(' === start subs ===')
 
@@ -132,17 +131,18 @@ class SubscriptionCreate(models.Model):
                 'in_progress': True
             })
         except:
-            _logger.error(f'Error encountered while starting subscription for {self.record.code}..')
+            if max_retries > 1:
+                self._start_subscription(record, max_retries-1)
+            else:
+                _logger.error(f'Error encountered while starting subscription for {self.record.code}..')
 
 
-    def _generate_atmref(self, record):
+    def generate_atmref(self, record, max_retries):
 
         _logger.info(' === _generate_atmref() ===')
         try:
             self.record = record
-            # company_id = vals.get('company_id')
             company = self.record.company_id
-            # company = self.env['res.company'].search([('id', '=', company_id)])
 
             code_seq = company.company_code.filtered(
                 lambda code: code.is_active == True
@@ -155,10 +155,9 @@ class SubscriptionCreate(models.Model):
                 'atm_ref_sequence': code_seq[0]._get_seq_count()
             })
 
-            # vals['atm_ref_sequence'] = code_seq[0]._get_seq_count()
         except:
-            _logger.error('Error encountered while generating atm reference for subscription {self.record.code}..')
+            if max_retries > 1:
+                self._generate_atmref(record, max_retries-1)
+            else:
+                _logger.error(f'Error encountered while generating atm reference for subscription {self.record.code}..')
 
-    def _activate(self, record, main_plan, max_retries, add_to_timebank):
-        _logger.info(' === activate ===')
-        self._send_to_aradial(record, main_plan, max_retries, add_to_timebank)

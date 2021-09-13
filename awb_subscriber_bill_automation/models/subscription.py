@@ -46,19 +46,25 @@ class SaleSubscription(models.Model):
 
         _logger.info('create')
         self.record = res
-        main_plan = self._get_mainplan(self.record)
-        last_subscription = self._checkLastActiveSubscription(self.record, main_plan)
+        main_plan = self._get_mainplan(self.record)        
+        plan_type = main_plan.sf_plan_type.name
 
-        self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
-        # Helper to update Odoo Opportunity
-        sf = Salesforce()
-        sf.update_opportunity(record)
+        if plan_type == 'Prepaid':
+            last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
 
-        # CTP flow for prepaid, 
-        # if(last_subscription && newsubscription.opportunity_id is None)
-        #     SubsDiscon.disconnect(last_subscription)
-        #     # Helper to update Odoo Opportunity
-        #     Salesforce.update_opportunity(last_subscription)
+            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
+            # Helper to update Odoo Opportunity
+
+            # sf = Salesforce()
+            # sf.update_opportunity(self.record)
+
+            # CTP flow for prepaid, 
+            # if(last_subscription && newsubscription.opportunity_id is None)
+            #     SubsDiscon.disconnect(last_subscription)
+            #     # Helper to update Odoo Opportunity
+            #     Salesforce.update_opportunity(last_subscription)
+
+        self.env['sale.subscription'].generate_atmref(self.record, 3)
 
         return res
 
@@ -73,9 +79,8 @@ class SaleSubscription(models.Model):
         return main_plan  
 
 
-    def _checkLastActiveSubscription(self, record, main_plan):
+    def _checkLastActiveSubscription(self, record, plan_type):
         _logger.info('checkLastActiveSubs')
-        plan_type = main_plan.sf_plan_type.name
         customer_id = record.customer_number
 
         _logger.info(customer_id)
@@ -84,7 +89,7 @@ class SaleSubscription(models.Model):
 
         # Checking for existing subscriptions
         # For Postpaid, only one subscription at a time is allowed
-        # For Prepaid, multiple subscriptions are allowed; however, to lessen confusion, only 2 at a time will be allowed
+        # For Prepaid, multiple subscriptions are allowed; however, to avoid confusion, only 2 at a time will be allowed
         if plan_type == 'Postpaid':
             if len(activeSubs) >= 2:
                 raise Warning('Multiple Postpaid subscription not allowed for Customer {customer_id}')
@@ -96,6 +101,15 @@ class SaleSubscription(models.Model):
             else:
                 return False
 
+    # @api.model
+    # def update(self, vals):
+    #     if(subscription_status == 'Disconnected')
+        
+    #     elif(subscription_status == 'Convert')
+        
+    #     elif(subscription_status == 'Upgrade')
+
+    #     elif(subscription_status == 'Downgrade')
 
     @api.depends("atm_ref_sequence")
     def _compute_atm_reference_number(self):
