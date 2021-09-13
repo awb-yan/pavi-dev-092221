@@ -43,6 +43,10 @@ class SaleSubscription(models.Model):
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
 
         # self._provisioning (vals)
+        _logger.info('create')
+        _logger.info(vals)
+        invoice_lines = vals['recurring_invoice_line_ids']
+        _logger.info(invoice_lines)
 
         res = super(SaleSubscription, self).create(vals)
         return res
@@ -86,6 +90,11 @@ class SaleSubscription(models.Model):
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '!=', 'disconnection')])
 
+# pag more than 2, error log or warning
+# one customer_id per plan type
+
+
+# add comment on the scenario
         if len(activeSubs) >= 2:
             for subs in activeSubs:
                 for line_id in subs.recurring_invoice_line_ids:

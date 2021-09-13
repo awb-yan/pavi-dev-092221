@@ -38,6 +38,7 @@ class SubscriptionCreate(models.Model):
         if aradial_flag:
             self._activate(record, main_plan, max_retries, add_to_timebank)
 
+
         self._start_subscription(record)
         self._generate_atmref(record)
             
@@ -115,6 +116,7 @@ class SubscriptionCreate(models.Model):
                 self._send_to_aradial(record, main_plan, max_retries-1, additional_time)
             else:
                 _logger.info('Add to Failed transaction log')
+                #throw another exception
 
     def _start_subscription(self, record):
 
