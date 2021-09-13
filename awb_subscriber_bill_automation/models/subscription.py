@@ -9,6 +9,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+import json
 # from ..api.client.sf_updateaccount import Salesforce
 
 import logging
@@ -51,6 +52,8 @@ class SaleSubscription(models.Model):
             _logger.info(a)
             _logger.info(b)
             _logger.info(c['name'])
+        jason = json.dumps(vals)
+        _logger.info(json)
 
         res = super(SaleSubscription, self).create(vals)
         return res
