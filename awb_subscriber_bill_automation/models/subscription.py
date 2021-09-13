@@ -61,7 +61,8 @@ class SaleSubscription(models.Model):
 
         res = super(SaleSubscription, self).create(vals)
 
-        _logger.info(res)
+        _logger.info(res.id)
+
         return res
 
     def _create(self, record):
