@@ -41,7 +41,7 @@ class AradialAPIGatewayUpdateUser(object):
 
         _logger.info(res.json())
         
-        state = "Success" if res.status_code == 201 else "Fail"
+        state = True if res.status_code == 201 else False
         _logger.info("response [%s]" % res)
 
         return state
