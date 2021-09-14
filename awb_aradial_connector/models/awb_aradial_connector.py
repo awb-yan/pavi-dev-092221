@@ -13,13 +13,6 @@ class AWBAradialConnector(models.Model):
     _name = 'aradial.connector'
     _description = 'AWB Aradial Connector'
 
-    def __init__(self):
-        params = self.env['ir.config_parameter'].sudo()
-        self.aradial_url = params.get_param('aradial_url')
-        self.aradial_username = params.get_param('aradial_username')
-        self.aradial_password = params.get_param('aradial_password')
-
-
     def create_user(
         self, 
         data
@@ -27,6 +20,11 @@ class AWBAradialConnector(models.Model):
 
         _logger.info("Create User")
         
+        params = self.env['ir.config_parameter'].sudo()
+        self.aradial_url = params.get_param('aradial_url')
+        self.aradial_username = params.get_param('aradial_username')
+        self.aradial_password = params.get_param('aradial_password')
+
         user = AradialAPIGatewayCreateUser(
             url=self.aradial_url,
             username=self.aradial_username,
@@ -48,6 +46,11 @@ class AWBAradialConnector(models.Model):
     ):
         _logger.info("Get Remaining Time")
         
+        params = self.env['ir.config_parameter'].sudo()
+        self.aradial_url = params.get_param('aradial_url')
+        self.aradial_username = params.get_param('aradial_username')
+        self.aradial_password = params.get_param('aradial_password')
+
         user = AradialAPIGatewayGetUser(
             url=self.aradial_url,
             username=self.aradial_username,
@@ -65,6 +68,11 @@ class AWBAradialConnector(models.Model):
     ):
         _logger.info("Update User's Timebank")
         
+        params = self.env['ir.config_parameter'].sudo()
+        self.aradial_url = params.get_param('aradial_url')
+        self.aradial_username = params.get_param('aradial_username')
+        self.aradial_password = params.get_param('aradial_password')
+
         user = AradialAPIGatewayUpdateUser(
             url=self.aradial_url,
             username=self.aradial_username,
