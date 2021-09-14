@@ -93,6 +93,8 @@ class SubscriptionCreate(models.Model):
                     last_name = ''
 
                 self.data = {
+                    'Page': 'UserEdit',
+                    'Add': 1,
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
                     'CustomInfo1': record.code,
@@ -115,9 +117,10 @@ class SubscriptionCreate(models.Model):
 
             else:   # CTP - Update User's TimeBank
                 self.data = {
+                    'Page': 'UserEdit',
+                    'Modify': 1,
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
-                    'Offer': main_plan.default_code.upper(),
                     'TimeBank': additional_time,
                     'UseTimeBank': 1
                 }
@@ -130,7 +133,7 @@ class SubscriptionCreate(models.Model):
 
         except:
             if max_retries > 1:
-                self._send_to_aradial(record, main_plan, max_retries-1, additional_time)
+                self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
             else:
                 _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
                 raise Exception(f'Error Creating user in Aradial for {record.code}')
