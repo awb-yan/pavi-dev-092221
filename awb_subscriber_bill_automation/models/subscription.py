@@ -88,6 +88,7 @@ class SaleSubscription(models.Model):
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '!=', 'disconnection')], order='id desc')
 
+        _logger.info(activeSubs)
         # Checking for existing subscriptions
         # For Postpaid, only one subscription at a time is allowed
         # For Prepaid, multiple subscriptions are allowed; however, to avoid confusion, only 2 at a time will be allowed
@@ -99,6 +100,8 @@ class SaleSubscription(models.Model):
         else:
             if len(activeSubs) > 2:
                 _logger.error('Multiple prepaid subscription found for Customer {customer_id}')
+            elif len(activeSubs) == 2:
+                return activeSubs[1]
             else:
                 return False
 
