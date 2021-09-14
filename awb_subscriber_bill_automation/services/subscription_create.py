@@ -121,6 +121,7 @@ class SubscriptionCreate(models.Model):
                     'Modify': 1,
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
+                    'Offer': main_plan.default_code.upper(),
                     'TimeBank': additional_time,
                     'UseTimeBank': 1
                 }
