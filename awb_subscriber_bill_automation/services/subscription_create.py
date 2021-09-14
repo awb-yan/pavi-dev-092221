@@ -36,7 +36,7 @@ class SubscriptionCreate(models.Model):
 
         # Facility Type routing
         if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, add_to_timebank)
+            self._send_to_aradial(record, main_plan, max_retries, add_to_timebank, last_subscription)
 
         self._start_subscription(record, max_retries)
 
@@ -78,38 +78,55 @@ class SubscriptionCreate(models.Model):
         return remaining_seconds
 
    
-    def _send_to_aradial(self, record, main_plan, max_retries, additional_time):
+    def _send_to_aradial(self, record, main_plan, max_retries, additional_time, last_subscription):
         _logger.info('send to aradial')
         try:
-            # for Residential
-            first_name = record.partner_id.first_name
-            last_name = record.partner_id.last_name
+            # New Subscription
+            if not last_subscription:
+                # for Residential
+                first_name = record.partner_id.first_name
+                last_name = record.partner_id.last_name
 
-            # for Corporate
-            if not first_name: 
-                first_name = record.partner_id.name
-                last_name = ''
+                # for Corporate
+                if not first_name: 
+                    first_name = record.partner_id.name
+                    last_name = ''
 
-            self.data = {
-                'UserID': record.opportunity_id.jo_sms_id_username,
-                'Password': record.opportunity_id.jo_sms_id_password,
-                'CustomInfo1': record.code,
-                'CustomInfo2': record.subscriber_location_id.name,
-                'CustomInfo3': record.customer_number,
-                'Offer': main_plan.default_code.upper(),
-                'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
-                'Status': 0,
-                'FirstName': first_name,
-                'LastName': last_name,
-                'ServiceType': 'Internet',
-                'TimeBank': additional_time,
-                'UseTimeBank': 1
-            }
+                self.data = {
+                    'UserID': record.opportunity_id.jo_sms_id_username,
+                    'Password': record.opportunity_id.jo_sms_id_password,
+                    'CustomInfo1': record.code,
+                    'CustomInfo2': record.subscriber_location_id.name,
+                    'CustomInfo3': record.customer_number,
+                    'Offer': main_plan.default_code.upper(),
+                    'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
+                    'Status': 0,
+                    'FirstName': first_name,
+                    'LastName': last_name,
+                    'ServiceType': 'Internet',
+                    'TimeBank': additional_time,
+                    'UseTimeBank': 1
+                }
 
-            _logger.info(self.data)
+                _logger.info(self.data)
 
-            if not self.env['aradial.connector'].create_user(self.data):
-                raise Exception
+                if not self.env['aradial.connector'].create_user(self.data):
+                    raise Exception
+
+            else:   # CTP - Update User's TimeBank
+                self.data = {
+                    'UserID': record.opportunity_id.jo_sms_id_username,
+                    'Password': record.opportunity_id.jo_sms_id_password,
+                    'TimeBank': additional_time,
+                    'UseTimeBank': 1
+                }
+
+                _logger.info(self.data)
+
+                if not self.env['aradial.connector'].update_user(self.data):
+                    raise Exception
+
+
         except:
             if max_retries > 1:
                 self._send_to_aradial(record, main_plan, max_retries-1, additional_time)
