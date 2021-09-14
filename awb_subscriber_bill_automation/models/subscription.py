@@ -52,7 +52,7 @@ class SaleSubscription(models.Model):
 
         if plan_type == 'Prepaid':
             last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
-
+            self.record.opportunity_id = last_subscription.opportunity_id
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
             # Helper to update Odoo Opportunity
 
@@ -60,7 +60,7 @@ class SaleSubscription(models.Model):
             # sf.update_opportunity(self.record)
 
             # CTP flow for prepaid, 
-            if last_subscription and self.record.opportunity_id is False:
+            if last_subscription:
                 self.env['sale.subscription'].disconnect(last_subscription)
             #     # Helper to update Odoo Opportunity
             #     Salesforce.update_opportunity(last_subscription)
