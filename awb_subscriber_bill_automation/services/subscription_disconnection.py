@@ -22,8 +22,9 @@ class SubscriptionDisconnect(models.Model):
 
     def disconnect(self, last_subscription):
         #OAuth
-
-        AUTH_URL = 'https://awb-yan-dev-0823.odoo.com/auth/'
+#awbselds-pavi-dev-subs-mgt-090621-production-3170197
+        # AUTH_URL = 'https://awb-yan-dev-0823.odoo.com/auth/'
+        AUTH_URL = 'https://pavi-dev-subs-mgt.odoo.com/auth/'
         headers = {'Content-type': 'application/json'}
 
         data = {
@@ -31,7 +32,7 @@ class SubscriptionDisconnect(models.Model):
             'params': {
                 'login': 'admin',
                 'password': 'admin',
-                'db': 'awb-yan-dev-0823-production-3087740'
+                'db': 'awbselds-pavi-dev-subs-mgt-090621-production-3170197'
             }
         }        
 
@@ -64,7 +65,7 @@ class SubscriptionDisconnect(models.Model):
         # PHYV
 
 
-        DISCON_URL = 'https://awb-yan-dev-0823.odoo.com/api/subscription/disconnection/'
+        DISCON_URL = 'https://pavi-dev-subs-mgt.odoo.com/api/subscription/disconnection/'
 
         res = requests.patch(
             DISCON_URL, 

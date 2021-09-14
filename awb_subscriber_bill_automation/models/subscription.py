@@ -420,44 +420,44 @@ class SaleSubscription(models.Model):
     def _get_discon_type(self, discon_type, channel):
         types = {
             "sysv": {
-                "sf": "System, Voluntary",
-                "od": "disconnection-temporary",
-                "ar": "",
+                "sf": {"name": "Salesforce", "value": "System, Voluntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
                 "desc": "Subscriber Request",
                 "function": "_change_status_subtype"
             },
             "sysi_expiry": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
                 "desc": "Promo Expiry",
                 "function": "_change_status_subtype"
             },
             "sysi_bandwidth": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Bandwidth UsageExceeded",
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Bandwidth Usage Exceeded",
                 "function": "_change_status_subtype"
             },
             "sysi_nonpayment": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
                 "desc": "Billing Non-Payment",
                 "function": "_change_status_subtype"
             },
             "phyi_nonpayment": {
-                "sf": "Physical, Involuntary",
-                "od": "disconnection-permanent",
-                "ar": "",
+                "sf": {"name": "Salesforce", "value": "Physical, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-permanent"},
+                "ar": {"name": "Aradial", "value": ""},
                 "desc": "Billing Non-Payment",
                 "function": "_change_status_subtype"
             },
             "phyv": {
-                "sf": "Physical, Voluntary",
-                "od": "disconnection-permanent",
-                "ar": "",
+                "sf": {"name": "Salesforce", "value": "Physical, Voluntary"},
+                "od": {"name": "Odoo", "value": "disconnection-permanent"},
+                "ar": {"name": "Aradial", "value": ""},
                 "desc": "Subscriber Request",
                 "function": "_change_status_subtype"
             },
@@ -468,100 +468,28 @@ class SaleSubscription(models.Model):
             value = discon_type.get(channel)
             if value:
                 return {
-                    "status": value,
+                    "name": value.get("name"),
+                    "status": value.get("value"),
                     "description": discon_type.get("desc"),
                     "executable": discon_type.get("function")
                 }
 
         return False
 
-    def _change_status_subtype(self, records, status):
-        records.write(
-            {"subscription_status_subtype": status}
-        )
+    def _change_status_subtype(self, records, status, executed=False):
+        for record in records:
+            if (
+                record.subscription_status != "disconnection"
+                or record.subscription_status_subtype != status
+            ):
+                record.write({
+                    "subscription_status": "disconnection",
+                    "subscription_status_subtype": status
+                })
 
-    @api.depends('stage_id')
-    def _get_stage_name(self):
-        for rec in self:
-            rec.state = rec.stage_id.name
+                executed = True
 
-    @api.depends('recurring_invoice_line_ids')
-    def _get_subs_product_names(self):
-        products = []
-        desc = []
-        for rec in self:
-            for line_item in rec.recurring_invoice_line_ids:
-                if line_item.product_id.type == 'service':
-                    products.append(line_item.display_name)
-                    desc.append(line_item.name)  # description
-                    desc.append(str(line_item.quantity))
-                    if line_item.date_start:
-                        desc.append(line_item.date_start.strftime("%b %d, %Y"))
-            rec.product_names = ', '.join(products)
-            rec.product_desc = ', '.join(desc)
-
-    def _get_discon_type(self, discon_type, channel):
-        types = {
-            "sysv": {
-                "sf": "System, Voluntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-            "sysi_expiry": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Promo Expiry",
-                "function": "_change_status_subtype"
-            },
-            "sysi_bandwidth": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Bandwidth UsageExceeded",
-                "function": "_change_status_subtype"
-            },
-            "sysi_nonpayment": {
-                "sf": "System, Involuntary",
-                "od": "disconnection-temporary",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyi_nonpayment": {
-                "sf": "Physical, Involuntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Billing Non-Payment",
-                "function": "_change_status_subtype"
-            },
-            "phyv": {
-                "sf": "Physical, Voluntary",
-                "od": "disconnection-permanent",
-                "ar": "",
-                "desc": "Subscriber Request",
-                "function": "_change_status_subtype"
-            },
-        }
-
-        discon_type = types.get(discon_type)
-        if discon_type:
-            value = discon_type.get(channel)
-            if value:
-                return {
-                    "status": value,
-                    "description": discon_type.get("desc"),
-                    "executable": discon_type.get("function")
-                }
-
-        return False
-
-    def _change_status_subtype(self, records, status):
-        records.write(
-            {"subscription_status_subtype": status}
-        )
+        return executed
 
 class SaleSubscriptionLine(models.Model):
     _inherit = "sale.subscription.line"
