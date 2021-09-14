@@ -5,4 +5,4 @@
 #
 ##############################################################################
 
-from . import subscription_create
+from . import subscription_create, subscription_disconnection

@@ -21,18 +21,24 @@ class SubscriptionDisconnect(models.Model):
     _inherit = "sale.subscription"
 
     def disconnect(self, last_subscription):
+
+        params = self.env['ir.config_parameter'].sudo()
+        base_url = params.get_param('web.base.url')
+        login = params.get_param('odoo_user_login')
+        password = params.get_param('odoo_user_password')
+        database = params.get_param('odoo_database')
+
         #OAuth
-#awbselds-pavi-dev-subs-mgt-090621-production-3170197
-        # AUTH_URL = 'https://awb-yan-dev-0823.odoo.com/auth/'
-        AUTH_URL = 'https://pavi-dev-subs-mgt.odoo.com/auth/'
+
+        AUTH_URL = base_url + '/auth/'
         headers = {'Content-type': 'application/json'}
 
         data = {
             "jsonrpc": "2.0",
             'params': {
-                'login': 'admin',
-                'password': 'admin',
-                'db': 'awbselds-pavi-dev-subs-mgt-090621-production-3170197'
+                'login': login,
+                'password': password,
+                'db': database
             }
         }        
 
@@ -51,8 +57,8 @@ class SubscriptionDisconnect(models.Model):
                 'channel': 'od',
                 'discon_type': 'SYSV',
                 'subscriptions': [
-                    # {'code': last_subscription.code, 'smsid': last_subscription.opportunity_id.jo_sms_id_username}
-                    {'code': 'SUB098', 'smsid': 'CMurillo'}
+                    {'code': last_subscription.code, 'smsid': last_subscription.opportunity_id.jo_sms_id_username}
+                    # {'code': 'SUB098', 'smsid': 'CMurillo'}
                 ]
             }
         }
@@ -65,7 +71,7 @@ class SubscriptionDisconnect(models.Model):
         # PHYV
 
 
-        DISCON_URL = 'https://pavi-dev-subs-mgt.odoo.com/api/subscription/disconnection/'
+        DISCON_URL = base_url + '/api/subscription/disconnection/'
 
         res = requests.patch(
             DISCON_URL, 

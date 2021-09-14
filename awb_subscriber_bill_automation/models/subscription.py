@@ -59,8 +59,8 @@ class SaleSubscription(models.Model):
             # sf.update_opportunity(self.record)
 
             # CTP flow for prepaid, 
-            # if(last_subscription && newsubscription.opportunity_id is None)
-            #     SubsDiscon.disconnect(last_subscription)
+            if last_subscription and self.record.opportunity_id is False:
+                self.env['sale.subscription'].disconnect(last_subscription)
             #     # Helper to update Odoo Opportunity
             #     Salesforce.update_opportunity(last_subscription)
 
