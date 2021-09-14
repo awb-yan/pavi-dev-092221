@@ -6,8 +6,6 @@ from psycopg2.extensions import AsIs
 import datetime
 import logging
 
-from awb_aradial_connector.api.aradial_gateway import update_user
-
 _logger = logging.getLogger(__name__)
 
 class AWBAradialConnector(models.Model):
