@@ -42,15 +42,14 @@ class SaleSubscription(models.Model):
         # Commenting this for now
         # Origin code
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
-        _logger.info('--- subs_template palang ---')
         res = super(SaleSubscription, self).create(vals)
 
         _logger.info('create')
         self.record = res
-        _logger,info(' --- newSubs before --- ')
-        _logger,info(self.record.opportunity_id)
-        _logger,info(self.record.date_start)
-        _logger,info(self.record.stage_id)
+        _logger.info(' --- newSubs before --- ')
+        _logger.info(self.record.opportunity_id)
+        _logger.info(self.record.date_start)
+        _logger.info(self.record.stage_id)
 
         main_plan = self._get_mainplan(self.record)        
         plan_type = main_plan.sf_plan_type.name
@@ -70,10 +69,10 @@ class SaleSubscription(models.Model):
             #     # Helper to update Odoo Opportunity
             #     Salesforce.update_opportunity(last_subscription)
 
-        _logger,info('newSubs after')
-        _logger,info(self.record.opportunity_id)
-        _logger,info(self.record.date_start)
-        _logger,info(self.record.stage_id)
+        _logger.info('newSubs after')
+        _logger.info(self.record.opportunity_id)
+        _logger.info(self.record.date_start)
+        _logger.info(self.record.stage_id)
 
         self.env['sale.subscription'].generate_atmref(self.record, 3)
 
