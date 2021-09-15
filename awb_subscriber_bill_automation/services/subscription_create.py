@@ -69,13 +69,13 @@ class SubscriptionCreate(models.Model):
             _logger.info('first subs')
             remaining_seconds = 0
 
-            # _logger.info(' === Sending SMS Welcome Notification ===')
-            # # Welcome Provisioning Notification
-            # self.env["awb.sms.send"]._send_subscription_notif(
-            #     recordset=record,
-            #     template_name="Subscription Welcome Notification",
-            #     state="Draft"
-            # )
+            _logger.info(' === Sending SMS Welcome Notification ===')
+            # Welcome Provisioning Notification
+            self.env["awb.sms.send"]._send_subscription_notif(
+                recordset=record,
+                template_name="Subscription Welcome Notification",
+                state="Draft"
+            )
         else:
             # Check if still active, query remaining days in aradial
             remaining_seconds = self.env['aradial.connector'].get_remaining_time(last_subscription.opportunity_id.jo_sms_id_username)
