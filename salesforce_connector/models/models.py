@@ -102,7 +102,6 @@ class SalesForceSettingModel(models.TransientModel):
 
         :return:
         """
-        _logger.info('salesforce_connector: test_credentials')
         try:
             IrConfigParameter = self.env['ir.config_parameter'].sudo()
             username = IrConfigParameter.get_param('odoo_salesforce.sf_username')

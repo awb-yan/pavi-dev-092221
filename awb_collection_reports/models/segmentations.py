@@ -68,6 +68,7 @@ class AWBSegmentationPayment(models.Model):
 		total2 = 0
 		total3 = 0
 		total4 = 0
+		# for z in self:
 		if self.invoice_line:
 			for rec in self.invoice_line:
 				for line in rec.invoice:
@@ -88,3 +89,24 @@ class AWBSegmentationPayment(models.Model):
 							total4 += x.price_subtotal
 							self.others = total4
 							continue
+
+		if not self.invoice_line:
+		# if self.reconciled_invoice_ids:
+			for ids in self.reconciled_invoice_ids:
+				for y in ids.invoice_line_ids:
+					if y.product_id.product_tmpl_id.product_segmentation == "month_service":
+						total1 += y.price_subtotal
+						self.monthly_service = total1
+						continue
+					elif y.product_id.product_tmpl_id.product_segmentation == "device":
+						total2 += y.price_subtotal
+						self.device = total2
+						continue
+					elif y.product_id.product_tmpl_id.product_segmentation == "security_deposit":
+						total3 += y.price_subtotal
+						self.security_deposit = total3
+						continue
+					elif y.product_id.product_tmpl_id.product_segmentation == "others":
+						total4 += y.price_subtotal
+						self.others = total4
+						continue

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.0.1.7.2] - 2021-09-02
+
+    - [IMP] Added group view for Administrator access.
+    - [ADD] Added icon image
+
 ## [13.0.1.7.1] - 2021-07-29
 
     - [FIX] Confirm Purchase Order Button Show Stopper

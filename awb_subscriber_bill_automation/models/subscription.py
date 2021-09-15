@@ -47,6 +47,11 @@ class SaleSubscription(models.Model):
 
         _logger.info('create')
         self.record = res
+        _logger,info(' --- newSubs before --- ')
+        _logger,info(self.record.opportunity_id)
+        _logger,info(self.record.date_start)
+        _logger,info(self.record.stage_id)
+
         main_plan = self._get_mainplan(self.record)        
         plan_type = main_plan.sf_plan_type.name
 
@@ -64,6 +69,11 @@ class SaleSubscription(models.Model):
                 self.env['sale.subscription'].disconnect(last_subscription)
             #     # Helper to update Odoo Opportunity
             #     Salesforce.update_opportunity(last_subscription)
+
+        _logger,info('newSubs after')
+        _logger,info(self.record.opportunity_id)
+        _logger,info(self.record.date_start)
+        _logger,info(self.record.stage_id)
 
         self.env['sale.subscription'].generate_atmref(self.record, 3)
 

@@ -29,7 +29,6 @@ class SubscriptionDisconnect(models.Model):
         database = params.get_param('odoo_database')
 
         #OAuth
-
         AUTH_URL = base_url + '/auth/'
         headers = {'Content-type': 'application/json'}
 

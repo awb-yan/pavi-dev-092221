@@ -68,21 +68,33 @@ class SubscriptionCreate(models.Model):
         if not last_subscription:
             _logger.info('first subs')
             remaining_seconds = 0
+
+            _logger.info(' === Sending SMS Welcome Notification ===')
             # Welcome Provisioning Notification
-            # self._send_welcome_message(recordset=record, template_name="Subscription Welcome Notification", state="In Progress")
+            self.env["awb.sms.send"]._send_subscription_notif(
+                recordset=record,
+                template_name="Subscription Welcome Notification",
+                state="Draft"
+            )
         else:
-            # CTP Provisioning Notification
             # Check if still active, query remaining days in aradial
             remaining_seconds = self.env['aradial.connector'].get_remaining_time(last_subscription.opportunity_id.jo_sms_id_username)
-        
+
+            # _logger.info(' === Sending SMS CTP Notification ===')
+            # # CTP Provisioning Notification
+            # self.env["awb.sms.send"]._send_subscription_notif(
+            #     recordset=record,
+            #     template_name="Subscription Payment Notification",
+            #     state="Draft"
+            # )
+
         return remaining_seconds
 
-   
     def _send_to_aradial(self, record, main_plan, max_retries, additional_time, last_subscription):
         _logger.info('send to aradial')
-        try:
-            # New Subscription
-            if not last_subscription:
+        # New Subscription
+        if not last_subscription:
+            try:
                 # for Residential
                 first_name = record.partner_id.first_name
                 last_name = record.partner_id.last_name
@@ -93,8 +105,6 @@ class SubscriptionCreate(models.Model):
                     last_name = ''
 
                 self.data = {
-                    'Page': 'UserEdit',
-                    'Add': 1,
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
                     'CustomInfo1': record.code,
@@ -115,29 +125,33 @@ class SubscriptionCreate(models.Model):
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
 
-            else:   # CTP - Update User's TimeBank
-                self.data = {
-                    'Page': 'UserEdit',
-                    'Modify': 1,
-                    'UserID': record.opportunity_id.jo_sms_id_username,
-                    'Password': record.opportunity_id.jo_sms_id_password,
-                    'Offer': main_plan.default_code.upper(),
-                    'TimeBank': additional_time,
-                    'UseTimeBank': 1
-                }
+            except:
+                if max_retries > 1:
+                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription, last_subscription)
+                else:
+                    _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
+                    raise Exception(f'Error Creating user in Aradial for {record.code}')
 
-                _logger.info(self.data)
+        else:   # CTP - Update User's TimeBank
+            # 2 options to handle this:
+            #     1. Update the Offer of the User in Aradial (does it add up the remaining timebank?)
+            #     2. Get the remaining time and delete the user in Aradial, create new user with the additional_time
 
-                if not self.env['aradial.connector'].update_user(self.data):
-                    raise Exception
+            # self.data = {
+            #     'Page': 'UserEdit',
+            #     'Modify': 1,
+            #     'UserID': record.opportunity_id.jo_sms_id_username,
+            #     'Password': record.opportunity_id.jo_sms_id_password,
+            #     'Offer': main_plan.default_code.upper(),
+            #     'TimeBank': additional_time,
+            #     'UseTimeBank': 1
+            # }
 
+            # _logger.info(self.data)
 
-        except:
-            if max_retries > 1:
-                self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
-            else:
-                _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
-                raise Exception(f'Error Creating user in Aradial for {record.code}')
+            # if not self.env['aradial.connector'].update_user(self.data):
+            #     raise Exception
+            return True
 
 
     def _start_subscription(self, record, max_retries):
@@ -152,6 +166,14 @@ class SubscriptionCreate(models.Model):
                 'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
                 'in_progress': True
             })
+
+            # Send activation Notification ----
+            _logger.info(' === Sending SMS Activation Notification ===')
+            self.env["awb.sms.send"]._send_subscription_notif(
+                recordset=self.record,
+                template_name="Subscription Activation Notification",
+                state="In Progress"
+            )
         except:
             if max_retries > 1:
                 self._start_subscription(record, max_retries-1)

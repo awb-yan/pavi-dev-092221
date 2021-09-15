@@ -21,9 +21,10 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.0.0',
+    'version': '13.0.1.0.2',
 
     'depends': [
+        'account',
         'account_accountant',
         'awb_product_segmentation',
         'awb_payment_allocation',
