@@ -56,7 +56,10 @@ class SaleSubscription(models.Model):
 
         if plan_type == 'Prepaid':
             last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
-            self.record.opportunity_id = last_subscription.opportunity_id
+
+            if last_subscription:
+                self.record.opportunity_id = last_subscription.opportunity_id
+
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
             # Helper to update Odoo Opportunity
 
