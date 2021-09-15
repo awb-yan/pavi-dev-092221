@@ -37,6 +37,10 @@ class SaleSubscription(models.Model):
     atm_ref = fields.Char(string="ATM Reference", store=True, compute='_compute_atm_reference_number')
     atm_ref_sequence = fields.Char(string="ATM Reference Sequence", store=True)
 
+    state = fields.Char("State", compute='_get_stage_name')
+    product_names = fields.Char("Products", compute='_get_subs_product_names')
+    product_desc = fields.Char("Products Description", compute='_get_subs_product_names')
+
     @api.model
     def create(self, vals):
         # Commenting this for now
