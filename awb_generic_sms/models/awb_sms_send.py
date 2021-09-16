@@ -199,6 +199,7 @@ class SMS(models.Model):
                 # Get key and values of the record
                 # Keys is the template for e.g. ${partner_id}
                 for key in format_keys:
+                    _logger.info(f'key: {key}')
 
                     try:
                         value = getattr(record, key)
@@ -218,11 +219,12 @@ class SMS(models.Model):
                             _logger.info(f'record._fields[key].string: {record._fields[key].string}')
                             key_str = record._fields[key].string
                         except KeyError:
-                            _logger.info(f'Key Error: key = {key}')
+                            _logger.info(f'Key Error')
                             key_str = key
                         if key_str not in inc_data_params:
                             _logger.info(f'key_str not in inc_data_params')
                             inc_data_params.append(key_str)
+
 
                     raw_data = {key: value or ''}
                     key_value.update(raw_data)
