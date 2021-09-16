@@ -431,8 +431,12 @@ class SaleSubscription(models.Model):
         for rec in self:
             for line_item in rec.recurring_invoice_line_ids:
                 if line_item.product_id.product_segmentation == 'month_service':
+                    _logger.info("MSF")
+                    _logger.info(f'name: {line_item.product_id.name}')
+                    _logger.info(f'desc: {line_item.product_id.description}')
                     products.append(line_item.product_id.name)
                     desc.append(line_item.product_id.description)
+                
             rec.product_names = ', '.join(products)
             rec.product_desc = ', '.join(desc)
 
