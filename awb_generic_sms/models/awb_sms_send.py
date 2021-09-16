@@ -202,19 +202,23 @@ class SMS(models.Model):
                     _logger.info(f'key: {key}')
 
                     try:
+                        _logger.info(f'record: {record}')
                         value = getattr(record, key)
+                        _logger.info(f'value: {value}')
                     except AttributeError:
                         value = None
 
                     if value:
                         try:
                             if value.name:
+                                _logger.info(f'value.name: {value.name}')
                                 value = value.name
                         except AttributeError:
                             # Converts value into currency format
                             if isinstance(value, float):
                                 value = "\u20B1 {:,.2f}".format(value)
                     else:
+                        _logger.info(f'No value')
                         try:
                             _logger.info(f'record._fields[key].string: {record._fields[key].string}')
                             key_str = record._fields[key].string
