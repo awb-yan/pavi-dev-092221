@@ -436,7 +436,9 @@ class SaleSubscription(models.Model):
                     _logger.info(f'desc: {line_item.product_id.description}')
                     products.append(line_item.product_id.name)
                     desc.append(line_item.product_id.description)
-                
+            
+            if not desc:
+                desc = ''
             rec.product_names = ', '.join(products)
             rec.product_desc = ', '.join(desc)
 
