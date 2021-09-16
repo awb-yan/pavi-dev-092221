@@ -40,6 +40,7 @@ class SaleSubscription(models.Model):
     state = fields.Char("State", compute='_get_stage_name')
     product_names = fields.Char("Products", compute='_get_subs_product_names')
     product_desc = fields.Char("Products Description", compute='_get_subs_product_names')
+    datetime_now = fields.Char("Date and Time", compute='_get_datetime_now')
 
     @api.model
     def create(self, vals):
@@ -48,63 +49,63 @@ class SaleSubscription(models.Model):
         # vals['atm_ref_sequence'] = self.env['ir.sequence'].next_by_code('subscription.atm.reference.seq.code')
         res = super(SaleSubscription, self).create(vals)
 
-        _logger.info('create')
+        _logger.info('function: create')
         self.record = res
-        _logger.info(' --- newSubs before --- ')
-        _logger.info(self.record.opportunity_id)
-        _logger.info(self.record.date_start)
-        _logger.info(self.record.stage_id)
+        try:
+            main_plan = self._get_mainplan(self.record)        
 
-        main_plan = self._get_mainplan(self.record)        
-        plan_type = main_plan.sf_plan_type.name
+            _logger.info(f'Main_Plan: {main_plan}')
 
-        if plan_type == 'Prepaid':
-            last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
+            plan_type = main_plan.sf_plan_type.name
 
-            if last_subscription:
-                self.record.opportunity_id = last_subscription.opportunity_id
+            if plan_type == 'Prepaid':
+                last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
 
-            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
-            # Helper to update Odoo Opportunity
+                if last_subscription:
+                    self.record.opportunity_id = last_subscription.opportunity_id
+                    
+                self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
+                # Helper to update Odoo Opportunity
 
-            # sf = Salesforce()
-            # sf.update_opportunity(self.record)
+                # sf = Salesforce()
+                # sf.update_opportunity(self.record)
 
-            # CTP flow for prepaid, 
-            if last_subscription:
-                self.env['sale.subscription'].disconnect(last_subscription)
-            #     # Helper to update Odoo Opportunity
-            #     Salesforce.update_opportunity(last_subscription)
-
-        _logger.info('newSubs after')
-        _logger.info(self.record.opportunity_id)
-        _logger.info(self.record.date_start)
-        _logger.info(self.record.stage_id)
-
+                # CTP flow for prepaid, 
+                if last_subscription:
+                    self.env['sale.subscription'].disconnect(last_subscription)
+                #     # Helper to update Odoo Opportunity
+                #     Salesforce.update_opportunity(last_subscription)
+        except:
+            _logger.warning("Main Plan not found")
+            
         self.env['sale.subscription'].generate_atmref(self.record, 3)
 
         return res
 
 
     def _get_mainplan(self, record):
-        _logger.info(' === get_mainplan ===')
+        _logger.info('function: get_mainplan')
 
         for line_id in record.recurring_invoice_line_ids:
             if line_id.product_id.product_tmpl_id.product_segmentation == 'month_service':
                 main_plan = line_id.product_id.product_tmpl_id
+        
+        if main_plan is None:
+            raise Exception
 
         return main_plan  
 
 
     def _checkLastActiveSubscription(self, record, plan_type):
-        _logger.info('checkLastActiveSubs')
+        _logger.info('function: checkLastActiveSubs')
         customer_id = record.customer_number
 
-        _logger.info(customer_id)
+        _logger.info(f'Subscription Code: {record.code}')
+        _logger.info(f'Customer Number: {customer_id}')
 
         activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '!=', 'disconnection')], order='id desc')
 
-        _logger.info(activeSubs)
+        _logger.info(f'Active Subs: {activeSubs}')
         # Checking for existing subscriptions
         # For Postpaid, only one subscription at a time is allowed
         # For Prepaid, multiple subscriptions are allowed; however, to avoid confusion, only 2 at a time will be allowed
@@ -422,18 +423,16 @@ class SaleSubscription(models.Model):
         for rec in self:
             rec.state = rec.stage_id.name
 
+
     @api.depends('recurring_invoice_line_ids')
     def _get_subs_product_names(self):
         products = []
         desc = []
         for rec in self:
             for line_item in rec.recurring_invoice_line_ids:
-                if line_item.product_id.type == 'service':
-                    products.append(line_item.display_name)
-                    desc.append(line_item.name)  # description
-                    desc.append(str(line_item.quantity))
-                    if line_item.date_start:
-                        desc.append(line_item.date_start.strftime("%b %d, %Y"))
+                if line_item.product_id.product_segmentation == 'month_service':
+                    products.append(line_item.product_id.name)
+                    desc.append(line_item.product_id.description)
             rec.product_names = ', '.join(products)
             rec.product_desc = ', '.join(desc)
 
@@ -510,6 +509,11 @@ class SaleSubscription(models.Model):
                 executed = True
 
         return executed
+
+    def _get_datetime_now(self):
+        for rec in self:
+            rec.datetime_now = datetime.now().strftime("%m/%d/%Y %I:%M %p")
+
 
 class SaleSubscriptionLine(models.Model):
     _inherit = "sale.subscription.line"

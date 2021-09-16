@@ -20,7 +20,10 @@ class SMS(models.Model):
         sms_gateway_url,
         sms_gateway_token,
     ):
+        _logger.info('function: _check_sms_gateway')
         if sms_gateway:
+            _logger.info('sms_gateway')
+            
             error = []
             if not sms_gateway_url:
                 error.append("SMS Gateway Url")
@@ -47,6 +50,7 @@ class SMS(models.Model):
         disconnection_subtype,
         record
     ):
+        _logger.info(f'function: check_sending_criteria')
         check_result = []
 
         if record.receive_sms == False:
@@ -133,6 +137,8 @@ class SMS(models.Model):
         disconnection_subtype=None,
         send_once=False,
     ):
+        _logger.info('function: send_now')
+
         params = self.env['ir.config_parameter'].sudo()
         sms_gateway = params.get_param('smart_gateway')
         sms_gateway_url = params.get_param('smart_gateway_url')
@@ -146,17 +152,23 @@ class SMS(models.Model):
 
         record_validations = []
         if recordset and send_type != "generic":
+            _logger.info('  recordset and type != generic')
             if not state:
+                _logger.info('    not state')
                 raise exceptions.ValidationError(
                     ("State parameter is required, Please check server actions")
                 )
             if recordset.filtered(lambda rec: rec.state != state).exists():
+                _logger.info('    No state')
                 raise exceptions.ValidationError(
                     ("Record should be in %s state.") % state
                 )
 
             # Get the raw template and keys for formatting
             raw_template_body, format_keys = self.env['awb.sms.template'].get_template_format(template_name)
+
+            _logger.info(f'  Raw Template Body: {raw_template_body}')
+            _logger.info(f'  Format Keys: {format_keys}')
 
             recordset_count = len(recordset)
             data_recordset = []
@@ -165,6 +177,7 @@ class SMS(models.Model):
 
                 inc_data_params = []
                 if send_type == "on_demand":
+                    _logger.info(f'    On demand send type')
                     has_issues = self._check_sending_criteria(
                         allow_partial_payment,
                         send_only_to_active,
@@ -175,6 +188,7 @@ class SMS(models.Model):
                         record
                     )
                     if has_issues:
+                        _logger.info(f'      {record} has issues')
                         if recordset_count > 1:
                             record_validations.append(record.display_name)
                         else:
@@ -201,10 +215,13 @@ class SMS(models.Model):
                                 value = "\u20B1 {:,.2f}".format(value)
                     else:
                         try:
+                            _logger.info(f'record._fields[key].string: {record._fields[key].string}')
                             key_str = record._fields[key].string
                         except KeyError:
+                            _logger.info(f'Key Error: key = {key}')
                             key_str = key
                         if key_str not in inc_data_params:
+                            _logger.info(f'key_str not in inc_data_params')
                             inc_data_params.append(key_str)
 
                     raw_data = {key: value or ''}
@@ -218,6 +235,7 @@ class SMS(models.Model):
                         # This is for scheduled SMS
                         has_invalid_field = True
 
+                _logger.info(f'raw_template_body.format_map(key_value): {raw_template_body.format_map(key_value)}')
                 # Append the data to actual template message
                 template_body = raw_template_body.format_map(key_value)
                 data_recordset.append(
@@ -404,6 +422,7 @@ class SMS(models.Model):
             )
 
     def _send_subscription_notif(self, recordset, template_name, state):
+        _logger.info('function: _send_subscription_notif')
         self.send_now(
             recordset=recordset,
             template_name=template_name,

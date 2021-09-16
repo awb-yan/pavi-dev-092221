@@ -51,8 +51,10 @@ Hi ${partner_id} ${customer_number}. We've temporarily disconnected your account
             <field name="name">Subscription Welcome Notification</field>
             <field name="template_body">
 Hi ${partner_id}.
-Welcome to Streamtech, thank you for availing ${product_names} with ${product_desc}.
-You will receive another notice in [1-2] hours once your subscription has been activated.
+
+Thank you for subscribing to Streamtech Prepaid Fiber. Enjoy your ${product_desc}.
+
+You will receive another notice within an hour, once your subscription has been activated.
 For any concerns, you may contact [Customer Portal, Customer Service]
             </field>
         </record>
@@ -61,8 +63,17 @@ For any concerns, you may contact [Customer Portal, Customer Service]
             <field name="name">Subscription Activation Notification</field>
             <field name="template_body">
 Hi ${partner_id}.
-Your account has been successfully activated. You may now enjoy unlimited access to ${product_desc}.
+
+Your account has been successfully activated. You may now enjoy unlimited access to ${product_desc}
+
 For any inquiries and concerns, please contact us at [Link to Customer Portal, Customer Service]
+            </field>
+        </record>
+
+        <record id="sms_template_subs_expiry" model="awb.sms.template">
+            <field name="name">Subscription Expiry Notification</field>
+            <field name="template_body">
+Your Streamtech Prepaid Fiber subscription ${product_names} has ended today. ${datetime_now}. Top up your account at https://pavi.odoo.com/shop. For any inquiries and concerns, please contact us at [Link to Customer Portal,, Customer Service]
             </field>
         </record>
 

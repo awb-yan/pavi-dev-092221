@@ -19,7 +19,7 @@ class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
     def provision_and_activation(self, record, main_plan, last_subscription):
-        _logger.info('provision and activation')
+        _logger.info('function: provision_and_activation')
 
         max_retries = 3
         self.record = record
@@ -28,12 +28,16 @@ class SubscriptionCreate(models.Model):
         plan_type = main_plan.sf_plan_type.name
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
+        _logger.info(f'Plan Type: {plan_type}')
+        _logger.info(f'Aradial Flag: {aradial_flag}')
+
         # Plan Type Flow routing
         if plan_type == 'Postpaid':
             add_to_timebank = self._provision_postpaid(record, last_subscription)
         else:
             add_to_timebank = self._provision_prepaid(record, last_subscription)
 
+        _logger.info(f'Add to Timebank: {add_to_timebank}')
         # Facility Type routing
         if aradial_flag:
             self._send_to_aradial(record, main_plan, max_retries, add_to_timebank, last_subscription)
@@ -42,7 +46,7 @@ class SubscriptionCreate(models.Model):
 
        
     def _set_to_draft(self, record):
-        _logger.info(' === set_to_draft ===')
+        _logger.info('function: set_to_draft')
         self.record = record
 
         self.record['stage_id'] = self.env['sale.subscription.stage'].search([("name", "=", "Draft")]).id
@@ -63,20 +67,24 @@ class SubscriptionCreate(models.Model):
 
 
     def _provision_prepaid(self, record, last_subscription):
-        _logger.info('provision prepaid')
+        _logger.info('function: provision_prepaid')
         
         if not last_subscription:
-            _logger.info('first subs')
+            _logger.info('First subscription')
             remaining_seconds = 0
-
-            _logger.info(' === Sending SMS Welcome Notification ===')
-            # Welcome Provisioning Notification
-            self.env["awb.sms.send"]._send_subscription_notif(
-                recordset=record,
-                template_name="Subscription Welcome Notification",
-                state="Draft"
-            )
+            try:
+                _logger.info(' === Sending SMS Welcome Notification ===')
+                # Welcome Provisioning Notification
+                self.env["awb.sms.send"]._send_subscription_notif(
+                    recordset=record,
+                    template_name="Subscription Welcome Notification",
+                    state="Draft"
+                )
+                _logger.info('Completed Sending Welcome SMS')
+            except:
+                _logger.warning('Error sending Welcome Notification')
         else:
+            _logger.info('Reloading')
             # Check if still active, query remaining days in aradial
             remaining_seconds = self.env['aradial.connector'].get_remaining_time(last_subscription.opportunity_id.jo_sms_id_username)
 
@@ -91,7 +99,7 @@ class SubscriptionCreate(models.Model):
         return remaining_seconds
 
     def _send_to_aradial(self, record, main_plan, max_retries, additional_time, last_subscription):
-        _logger.info('send to aradial')
+        _logger.info('function: send_to_aradial')
         # New Subscription
         if not last_subscription:
             try:
@@ -125,9 +133,11 @@ class SubscriptionCreate(models.Model):
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
 
+                _logger.info('Successfully created user in Aradial')
+
             except:
                 if max_retries > 1:
-                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
+                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription, last_subscription)
                 else:
                     _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
                     raise Exception(f'Error Creating user in Aradial for {record.code}')
@@ -156,7 +166,7 @@ class SubscriptionCreate(models.Model):
 
     def _start_subscription(self, record, max_retries):
 
-        _logger.info(' === start subs ===')
+        _logger.info('function: start_subssubscription')
 
         try:
             self.record = record;
@@ -168,12 +178,17 @@ class SubscriptionCreate(models.Model):
             })
 
             # Send activation Notification ----
-            _logger.info(' === Sending SMS Activation Notification ===')
-            self.env["awb.sms.send"]._send_subscription_notif(
-                recordset=self.record,
-                template_name="Subscription Activation Notification",
-                state="In Progress"
-            )
+            try:            
+                _logger.info(' === Sending SMS Activation Notification ===')
+                self.env["awb.sms.send"]._send_subscription_notif(
+                    recordset=self.record,
+                    template_name="Subscription Activation Notification",
+                    state="In Progress"
+                )
+                _logger.info('Completed Sending Activation SMS')
+            except:
+                _logger.warning('Error sending Activation Notification')
+
         except:
             if max_retries > 1:
                 self._start_subscription(record, max_retries-1)
@@ -184,7 +199,7 @@ class SubscriptionCreate(models.Model):
 
     def generate_atmref(self, record, max_retries):
 
-        _logger.info(' === _generate_atmref() ===')
+        _logger.info('function: generate_atmref')
         try:
             self.record = record
             company = self.record.company_id
