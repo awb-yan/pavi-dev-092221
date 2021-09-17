@@ -140,7 +140,7 @@ class SubscriptionCreate(models.Model):
 
             except:
                 if max_retries > 1:
-                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription, last_subscription)
+                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
                 else:
                     _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
                     raise Exception(f'Error Creating user in Aradial for {record.code}')
