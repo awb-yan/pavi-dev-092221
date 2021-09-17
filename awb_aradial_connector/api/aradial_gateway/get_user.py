@@ -22,8 +22,10 @@ class AradialAPIGatewayGetUser(object):
     def get_user(self, sms_id_username):
 
         try:
+            url = self.url + "/" + sms_id_username
+            _logger.info(f'API URL: {url}')
             res = requests.get(
-                url=self.url + "/" + sms_id_username,
+                url=url,
                 auth=HTTPBasicAuth(self.username, self.password)
             )
         except requests.exceptions.MissingSchema as e:
