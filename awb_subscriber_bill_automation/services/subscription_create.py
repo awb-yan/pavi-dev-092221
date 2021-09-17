@@ -112,6 +112,8 @@ class SubscriptionCreate(models.Model):
                     first_name = record.partner_id.name
                     last_name = ''
 
+                # prepaid_indicator = 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0
+
                 self.data = {
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
@@ -124,6 +126,7 @@ class SubscriptionCreate(models.Model):
                     'FirstName': first_name,
                     'LastName': last_name,
                     'ServiceType': 'Internet',
+                    'PrepaidIndicator': 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0,
                     'TimeBank': additional_time,
                     'UseTimeBank': 1
                 }
