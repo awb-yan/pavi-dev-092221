@@ -91,6 +91,11 @@ class SaleSubscription(models.Model):
                 main_plan = line_id.product_id.product_tmpl_id
         
         if main_plan is None:
+            _logger.info('YAN: Main Plan is None')
+            raise Exception
+
+        if not main_plan:
+            _logger.info('YAN: Not Main Plan')
             raise Exception
 
         return main_plan  
