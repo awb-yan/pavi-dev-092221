@@ -77,10 +77,9 @@ class SaleSubscription(models.Model):
                 # Process System Discon
                 sf_update_type = 7
                 try:
-                    _logger.info('Calling Temporary Discon...')
                     is_closed_subs = True
                     subtype = "disconnection-temporary"
-                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs, executed=False)
+                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs)
                 except:
                     _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
 

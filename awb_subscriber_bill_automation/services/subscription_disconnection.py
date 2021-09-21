@@ -81,15 +81,12 @@ class SubscriptionDisconnect(models.Model):
 
     def _change_status_subtype(self, records, status, is_closed_subs = False, executed=False):
         _logger.info('function: _change_status_subtype')
-        _logger.info(f'To Close Subs: {is_closed_subs}')
         for record in records:
-            _logger.info(f'Record: {record}')
             if (
                 record.subscription_status != "disconnection"
                 or record.subscription_status_subtype != status
             ):
                 if is_closed_subs:
-                    _logger.info(f'Update Stage, Status and Substatus')
                     record.write({
                         "subscription_status": "disconnection",
                         "subscription_status_subtype": status,
@@ -97,11 +94,10 @@ class SubscriptionDisconnect(models.Model):
                         "in_progress": False
                     })
                 else:
-                    _logger.info(f'Update Status and Substatus')
                     record.write({
                         "subscription_status": "disconnection",
                         "subscription_status_subtype": status
                     })
                 executed = True
-        _logger.info(f'Executed: {executed}')
+
         return executed
