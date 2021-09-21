@@ -81,6 +81,7 @@ class SubscriptionDisconnect(models.Model):
 
     def _change_status_subtype(self, records, status, is_closed_subs = False, executed=False):
         _logger.info('function: _change_status_subtype')
+        _logger.info(f'To Close Subs: {is_closed_subs}')
         for record in records:
             _logger.info(f'Record: {record}')
             if (

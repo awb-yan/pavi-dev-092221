@@ -42,7 +42,7 @@ class AradialAPIGatewayUpdateUser(object):
 
         try:
             res = requests.put(
-                url=self.url+'/'+self.data.UserID,
+                url=self.url+'/'+self.data['UserID'],
                 headers=self.headers,
                 data=json.dumps(offer_data),
                 auth=HTTPBasicAuth(self.username, self.password)
@@ -61,7 +61,7 @@ class AradialAPIGatewayUpdateUser(object):
 
         try:
             res = requests.post(
-                url=self.userbalance_url+'/'+self.data.UserID,
+                url=self.userbalance_url+'/'+self.data['UserID'],
                 headers=self.headers,
                 data=json.dumps(timebank_data),
                 auth=HTTPBasicAuth(self.username, self.password)
