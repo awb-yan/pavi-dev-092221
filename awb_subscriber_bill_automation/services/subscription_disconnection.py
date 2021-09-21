@@ -88,16 +88,19 @@ class SubscriptionDisconnect(models.Model):
                 record.subscription_status != "disconnection"
                 or record.subscription_status_subtype != status
             ):
-                _logger.info(f'Update Status and Substatus')
-                record.write({
-                    "subscription_status": "disconnection",
-                    "subscription_status_subtype": status
-                })
                 if is_closed_subs:
-                    _logger.info(f'Update Stage')
+                    _logger.info(f'Update Stage, Status and Substatus')
                     record.write({
+                        "subscription_status": "disconnection",
+                        "subscription_status_subtype": status,
                         "stage_id" : self.env['sale.subscription.stage'].search([("name", "=", "Closed")]).id,
                         "in_progress": False
+                    })
+                else:
+                    _logger.info(f'Update Status and Substatus')
+                    record.write({
+                        "subscription_status": "disconnection",
+                        "subscription_status_subtype": status
                     })
                 executed = True
         _logger.info(f'Executed: {executed}')
