@@ -42,8 +42,6 @@ class SmartAPIGateway(object):
         text=None,
     ):
         _logger.info('function: send_sms_now')
-        _logger.info(f'Mobile Number: {destination}')
-        _logger.info(f'Template Body: {text}')
 
         data = {
             'messageType': message_type,
@@ -77,7 +75,7 @@ class SmartAPIGateway(object):
                 status_code = res.status_code
                 state = "sent" if status_code == 201 else "failed"
 
-                _logger.info(f'state (sent or failed): {state}')
+                _logger.debug(f'state (sent or failed): {state}')
 
             state_label = dict(self.sms_history._fields['state'].selection)[state]
 

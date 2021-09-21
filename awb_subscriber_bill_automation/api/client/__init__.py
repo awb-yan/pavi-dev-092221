@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from . import sf_updateaccount
+from . import sf_update_account

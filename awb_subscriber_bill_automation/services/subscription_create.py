@@ -28,8 +28,8 @@ class SubscriptionCreate(models.Model):
         plan_type = main_plan.sf_plan_type.name
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
-        _logger.info(f'Plan Type: {plan_type}')
-        _logger.info(f'Aradial Flag: {aradial_flag}')
+        _logger.debug(f'Plan Type: {plan_type}')
+        _logger.debug(f'Aradial Flag: {aradial_flag}')
 
         # Plan Type Flow routing
         if plan_type == 'Postpaid':
@@ -37,7 +37,7 @@ class SubscriptionCreate(models.Model):
         else:
             add_to_timebank = self._provision_prepaid(record, last_subscription)
 
-        _logger.info(f'Add to Timebank: {add_to_timebank}')
+        _logger.debug(f'Add to Timebank: {add_to_timebank}')
         # Facility Type routing
         if aradial_flag:
             self._send_to_aradial(record, main_plan, max_retries, add_to_timebank, last_subscription)
@@ -57,10 +57,10 @@ class SubscriptionCreate(models.Model):
     # TODO: update Postpaid provisioning
     def _provision_postpaid(self, record, last_subscription):
         if not last_subscription:
-            _logger.info('first')
+            _logger.debug('first')
             # Welcome Provisioning Notification
         else:
-            _logger.info('last')
+            _logger.debug('last')
             # Returning Subscriber Notification
 
         return 0
@@ -70,7 +70,7 @@ class SubscriptionCreate(models.Model):
         _logger.info('function: provision_prepaid')
         
         if not last_subscription:
-            _logger.info('First subscription')
+            _logger.debug('First subscription')
             remaining_seconds = 0
             try:
                 _logger.info(' === Sending SMS Welcome Notification ===')
@@ -80,15 +80,15 @@ class SubscriptionCreate(models.Model):
                     template_name="Subscription Welcome Notification",
                     state="Draft"
                 )
-                _logger.info('Completed Sending Welcome SMS')
+                _logger.debug('Completed Sending Welcome SMS')
             except:
-                _logger.warning('Error sending Welcome Notification')
+                _logger.warning('!!! Error sending Welcome Notification')
         else:
-            _logger.info('Reloading')
+            _logger.debug('Reloading')
             # Check if still active, query remaining days in aradial
             remaining_seconds = self.env['aradial.connector'].get_remaining_time(last_subscription.opportunity_id.jo_sms_id_username)
 
-            # _logger.info(' === Sending SMS CTP Notification ===')
+            # _logger.debug(' === Sending SMS CTP Notification ===')
             # # CTP Provisioning Notification
             # self.env["awb.sms.send"]._send_subscription_notif(
             #     recordset=record,
@@ -112,8 +112,6 @@ class SubscriptionCreate(models.Model):
                     first_name = record.partner_id.name
                     last_name = ''
 
-                # prepaid_indicator = 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0
-
                 self.data = {
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'Password': record.opportunity_id.jo_sms_id_password,
@@ -121,7 +119,7 @@ class SubscriptionCreate(models.Model):
                     'CustomInfo2': record.subscriber_location_id.name,
                     'CustomInfo3': record.customer_number,
                     'Offer': main_plan.default_code.upper(),
-                    'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
+                    # 'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
                     'Status': 0,
                     'FirstName': first_name,
                     'LastName': last_name,
@@ -131,7 +129,7 @@ class SubscriptionCreate(models.Model):
                     'UseTimeBank': 1
                 }
 
-                _logger.info(self.data)
+                _logger.debug(self.data)
 
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
@@ -142,29 +140,47 @@ class SubscriptionCreate(models.Model):
                 if max_retries > 1:
                     self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
                 else:
-                    _logger.error(f'Add to Failed transaction log - Subscription code {record.code}')
-                    raise Exception(f'Error Creating user in Aradial for {record.code}')
+                    _logger.error(f'!!! Add to Failed transaction log - Subscription code {record.code}')
+                    raise Exception(f'!!! Error Creating user in Aradial for {record.code}')
 
         else:   # CTP - Update User's TimeBank
             # 2 options to handle this:
             #     1. Update the Offer of the User in Aradial (does it add up the remaining timebank?)
             #     2. Get the remaining time and delete the user in Aradial, create new user with the additional_time
+            _logger.info(f'Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
+    
+            # for Residential
+            first_name = record.partner_id.first_name
+            last_name = record.partner_id.last_name
 
-            # self.data = {
-            #     'Page': 'UserEdit',
-            #     'Modify': 1,
-            #     'UserID': record.opportunity_id.jo_sms_id_username,
-            #     'Password': record.opportunity_id.jo_sms_id_password,
-            #     'Offer': main_plan.default_code.upper(),
-            #     'TimeBank': additional_time,
-            #     'UseTimeBank': 1
-            # }
+            # for Corporate
+            if not first_name: 
+                first_name = record.partner_id.name
+                last_name = ''
 
-            # _logger.info(self.data)
+            self.data = {
+                'Page': 'UserEdit',
+                'Modify': 1,
+                'UserID': record.opportunity_id.jo_sms_id_username,
+                'Password': record.opportunity_id.jo_sms_id_password,
+                'Status': 0,
+                'Offer': main_plan.default_code.upper(),
+                'Timebank': self._getTimebank(main_plan.default_code.upper()),
+                'CustomInfo1': record.code,
+                'CustomInfo2': record.subscriber_location_id.name,
+                'CustomInfo3': record.customer_number,
+                'FirstName': first_name,
+                'LastName': last_name,
+            }
 
-            # if not self.env['aradial.connector'].update_user(self.data):
-            #     raise Exception
-            return True
+            _logger.debug(f'Updating aradial user with data= {self.data}')
+
+            try:
+                if not self.env['aradial.connector'].update_user(self.data):
+                    raise Exception
+            except:
+                _logger.error(f'!!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+          
 
 
     def _start_subscription(self, record, max_retries):
@@ -188,16 +204,16 @@ class SubscriptionCreate(models.Model):
                     template_name="Subscription Activation Notification",
                     state="In Progress"
                 )
-                _logger.info('Completed Sending Activation SMS')
+                _logger.debug('Completed Sending Activation SMS')
             except:
-                _logger.warning('Error sending Activation Notification')
+                _logger.warning('!!! Error sending Activation Notification')
 
         except:
             if max_retries > 1:
                 self._start_subscription(record, max_retries-1)
             else:
-                _logger.error(f'Error encountered while starting subscription for {self.record.code}..')
-                raise Exception(f'Error encountered while starting subscription for {self.record.code}..')
+                _logger.error(f'!!! Error encountered while starting subscription for {self.record.code}..')
+                raise Exception(f'!!! Error encountered while starting subscription for {self.record.code}..')
 
 
     def generate_atmref(self, record, max_retries):
@@ -222,6 +238,18 @@ class SubscriptionCreate(models.Model):
             if max_retries > 1:
                 self._generate_atmref(record, max_retries-1)
             else:
-                _logger.error(f'Error encountered while generating atm reference for subscription {self.record.code}..')
-                raise Exception(f'Error encountered while generating atm reference for subscription {self.record.code}..')
+                _logger.error(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')
+                raise Exception(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')
 
+    def _getTimebank(self, offer):
+
+        if offer == 'PREPAIDFBR5DAYS':
+            return 5 * 86400
+        elif offer == 'PREPAIDFBR10DAYS':
+            return 10 * 86400
+        elif offer == 'PREPAIDFBR15DAYS':
+            return 15 * 86400
+        elif offer == 'PREPAIDFBR30DAYS':
+            return 30 * 86400
+        
+        raise 0

@@ -20,63 +20,80 @@ _logger = logging.getLogger(__name__)
 class SubscriptionDisconnect(models.Model):
     _inherit = "sale.subscription"
 
-    def disconnect(self, last_subscription):
-
-        params = self.env['ir.config_parameter'].sudo()
-        base_url = params.get_param('web.base.url')
-        login = params.get_param('odoo_user_login')
-        password = params.get_param('odoo_user_password')
-        database = params.get_param('odoo_database')
-
-        #OAuth
-        AUTH_URL = base_url + '/auth/'
-        headers = {'Content-type': 'application/json'}
-
-        data = {
-            "jsonrpc": "2.0",
-            'params': {
-                'login': login,
-                'password': password,
-                'db': database
-            }
-        }        
-
-        res = requests.post(
-            AUTH_URL,
-            data=json.dumps(data),
-            headers=headers
-        )
-
-        session_id = res.json().get("result").get("session_id")
-
-        # Disconnect Last Active Subscription
-        params = {'session_id': session_id}
-        data = {
-            'params': {
-                'channel': 'od',
-                'discon_type': 'SYSV',
-                'subscriptions': [
-                    {'code': last_subscription.code, 'smsid': last_subscription.opportunity_id.jo_sms_id_username}
-                    # {'code': 'SUB098', 'smsid': 'CMurillo'}
-                ]
-            }
+    def _get_discon_type(self, discon_type, channel):
+        types = {
+            "sysv": {
+                "sf": {"name": "Salesforce", "value": "System, Voluntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Subscriber Request",
+                "function": "_change_status_subtype"
+            },
+            "sysi_expiry": {
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Promo Expiry",
+                "function": "_change_status_subtype"
+            },
+            "sysi_bandwidth": {
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Bandwidth Usage Exceeded",
+                "function": "_change_status_subtype"
+            },
+            "sysi_nonpayment": {
+                "sf": {"name": "Salesforce", "value": "System, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-temporary"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Billing Non-Payment",
+                "function": "_change_status_subtype"
+            },
+            "phyi_nonpayment": {
+                "sf": {"name": "Salesforce", "value": "Physical, Involuntary"},
+                "od": {"name": "Odoo", "value": "disconnection-permanent"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Billing Non-Payment",
+                "function": "_change_status_subtype"
+            },
+            "phyv": {
+                "sf": {"name": "Salesforce", "value": "Physical, Voluntary"},
+                "od": {"name": "Odoo", "value": "disconnection-permanent"},
+                "ar": {"name": "Aradial", "value": ""},
+                "desc": "Subscriber Request",
+                "function": "_change_status_subtype"
+            },
         }
 
-        # SYSV
-        # SYSI_EXPIRY
-        # SYSI_BANDWIDTH
-        # SYSI_NONPAYMENT
-        # PHYI_NONPAYMENT
-        # PHYV
+        discon_type = types.get(discon_type)
+        if discon_type:
+            value = discon_type.get(channel)
+            if value:
+                return {
+                    "name": value.get("name"),
+                    "status": value.get("value"),
+                    "description": discon_type.get("desc"),
+                    "executable": discon_type.get("function")
+                }
 
+        return False
 
-        DISCON_URL = base_url + '/api/subscription/disconnection/'
+    def _change_status_subtype(self, records, status, is_closed_subs = False, executed=False):
+        for record in records:
+            if (
+                record.subscription_status != "disconnection"
+                or record.subscription_status_subtype != status
+            ):
+                record.write({
+                    "subscription_status": "disconnection",
+                    "subscription_status_subtype": status
+                })
+                if (is_closed_subs):
+                    record.write({
+                        "stage_id" : self.env['sale.subscription.stage'].search([("name", "=", "Closed")]).id,
+                        "in_progress": False
+                    })
+                executed = True
 
-        res = requests.patch(
-            DISCON_URL, 
-            data=json.dumps(data), 
-            headers=headers,
-            params=params
-        )
-
-        _logger.info(res.json())
+        return executed

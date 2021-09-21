@@ -22,7 +22,7 @@ class SMS(models.Model):
     ):
         _logger.info('function: _check_sms_gateway')
         if sms_gateway:
-            _logger.info('sms_gateway')
+            _logger.debug('sms_gateway')
             
             error = []
             if not sms_gateway_url:
@@ -152,14 +152,14 @@ class SMS(models.Model):
 
         record_validations = []
         if recordset and send_type != "generic":
-            _logger.info('  recordset and type != generic')
+            _logger.debug('recordset and type != generic')
             if not state:
-                _logger.info('    not state')
+                _logger.debug('not state')
                 raise exceptions.ValidationError(
                     ("State parameter is required, Please check server actions")
                 )
             if recordset.filtered(lambda rec: rec.state != state).exists():
-                _logger.info('    No state')
+                _logger.debug('No state')
                 raise exceptions.ValidationError(
                     ("Record should be in %s state.") % state
                 )
@@ -167,8 +167,8 @@ class SMS(models.Model):
             # Get the raw template and keys for formatting
             raw_template_body, format_keys = self.env['awb.sms.template'].get_template_format(template_name)
 
-            _logger.info(f'  Raw Template Body: {raw_template_body}')
-            _logger.info(f'  Format Keys: {format_keys}')
+            _logger.debug(f'Raw Template Body: {raw_template_body}')
+            _logger.debug(f'Format Keys: {format_keys}')
 
             recordset_count = len(recordset)
             data_recordset = []
@@ -177,7 +177,7 @@ class SMS(models.Model):
 
                 inc_data_params = []
                 if send_type == "on_demand":
-                    _logger.info(f'    On demand send type')
+                    _logger.debug(f'On demand send type')
                     has_issues = self._check_sending_criteria(
                         allow_partial_payment,
                         send_only_to_active,
@@ -188,7 +188,7 @@ class SMS(models.Model):
                         record
                     )
                     if has_issues:
-                        _logger.info(f'      {record} has issues')
+                        _logger.debug(f'{record} has issues')
                         if recordset_count > 1:
                             record_validations.append(record.display_name)
                         else:
@@ -199,36 +199,35 @@ class SMS(models.Model):
                 # Get key and values of the record
                 # Keys is the template for e.g. ${partner_id}
                 for key in format_keys:
-                    _logger.info(f'key: {key}')
+                    _logger.debug(f'key: {key}')
 
                     try:
-                        _logger.info(f'record: {record}')
+                        _logger.debug(f'record: {record}')
                         value = getattr(record, key)
-                        _logger.info(f'value: {value}')
+                        _logger.debug(f'value: {value}')
                     except AttributeError:
                         value = None
 
                     if value:
                         try:
                             if value.name:
-                                _logger.info(f'value.name: {value.name}')
+                                _logger.debug(f'value.name: {value.name}')
                                 value = value.name
                         except AttributeError:
                             # Converts value into currency format
                             if isinstance(value, float):
                                 value = "\u20B1 {:,.2f}".format(value)
                     else:
-                        _logger.info(f'No value')
+                        _logger.debug(f'No value')
                         try:
-                            _logger.info(f'record._fields[key].string: {record._fields[key].string}')
+                            _logger.debug(f'record._fields[key].string: {record._fields[key].string}')
                             key_str = record._fields[key].string
                         except KeyError:
-                            _logger.info(f'Key Error')
+                            _logger.debug(f'Key Error')
                             key_str = key
                         if key_str not in inc_data_params:
-                            _logger.info(f'key_str not in inc_data_params')
+                            _logger.debug(f'key_str not in inc_data_params')
                             inc_data_params.append(key_str)
-
 
                     raw_data = {key: value or ''}
                     key_value.update(raw_data)
@@ -241,7 +240,7 @@ class SMS(models.Model):
                         # This is for scheduled SMS
                         has_invalid_field = True
 
-                _logger.info(f'raw_template_body.format_map(key_value): {raw_template_body.format_map(key_value)}')
+                _logger.debug(f'raw_template_body.format_map(key_value): {raw_template_body.format_map(key_value)}')
                 # Append the data to actual template message
                 template_body = raw_template_body.format_map(key_value)
                 data_recordset.append(

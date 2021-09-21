@@ -14,9 +14,10 @@
       "|",
       ["subscription_status", "!=", "disconnection"],
       ["subscription_status_subtype", "!=", "disconnection-temporary"],
+      ["stage_id","=",2]      
     ]</field>
     <field name="filter_domain">[
-      ["stage_id","=",2],
+      ["stage_id","=",4],
       ["subscription_status","=","disconnection"],
       ["subscription_status_subtype","=","disconnection-temporary"],
       ["recurring_invoice_line_ids.product_id.sf_plan_type","=","Prepaid"]
