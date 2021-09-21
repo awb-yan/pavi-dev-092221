@@ -85,7 +85,7 @@ class SaleSubscription(models.Model):
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
 
             # Helper to update Odoo Opportunity
-            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
             
         self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
