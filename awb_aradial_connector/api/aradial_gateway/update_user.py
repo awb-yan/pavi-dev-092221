@@ -31,6 +31,7 @@ class AradialAPIGatewayUpdateUser(object):
 
     def update_user(self):
         _logger.info('function: update_user')
+        _logger
 
         # Update User's Product
         offer_data = {
