@@ -101,6 +101,18 @@ class SaleSubscription(models.Model):
                     self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs)
                 except:
                     _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
+                
+                try:            
+                    _logger.info(f' === Sending Expiry Notification ===')
+                    self.env["awb.sms.send"]._send_subscription_notif(
+                        recordset=self.record,
+                        template_name="Subscription Expiry Notification",
+                        state="Closed"
+                    )
+                    _logger.debug('Completed Sending Expiry Notification')
+                except:
+                    _logger.warning('!!! Error sending Expiry Notification')
+
 
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, ctp)
 
