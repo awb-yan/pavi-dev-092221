@@ -72,7 +72,7 @@ class SaleSubscription(models.Model):
 
             # CTP flow for prepaid, 
             if last_subscription:   
-                self.record = self._update_new_subscription
+                self.record = self._update_new_subscription(self.record, last_subscription)
                 # self.record.opportunity_id = last_subscription.opportunity_id
                 # Process System Discon
                 sf_update_type = 7
@@ -80,7 +80,7 @@ class SaleSubscription(models.Model):
                     is_closed_subs = True
                     self.env['sale.subscription']._change_status_subtype(self.record, "Temporary Discon", is_closed_subs)
                 except:
-                    _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record}')
+                    _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
 
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
 
