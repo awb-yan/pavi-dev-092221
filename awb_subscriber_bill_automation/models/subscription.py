@@ -80,7 +80,7 @@ class SaleSubscription(models.Model):
                     _logger.info('Calling Temporary Discon...')
                     is_closed_subs = True
                     subtype = "disconnection-temporary"
-                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs)
+                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs, executed=False)
                 except:
                     _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
 
