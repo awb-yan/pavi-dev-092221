@@ -31,6 +31,7 @@ class AradialAPIGatewayUpdateUser(object):
 
     def update_user(self):
         _logger.info('function: update_user')
+        _logger.info(self.data['UserID'])
 
         # Update User's Product
         offer_data = {
@@ -44,7 +45,7 @@ class AradialAPIGatewayUpdateUser(object):
             res = requests.put(
                 url=self.url+'/'+self.data['UserID'],
                 headers=self.headers,
-                data=json.dumps(offer_data),
+                data=offer_data,
                 auth=HTTPBasicAuth(self.username, self.password)
             )
         except requests.exceptions.MissingSchema as e:
