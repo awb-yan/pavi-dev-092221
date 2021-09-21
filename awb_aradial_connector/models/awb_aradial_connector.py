@@ -81,6 +81,12 @@ class AWBAradialConnector(models.Model):
             password=self.aradial_password,
             data=data
         )
+
+        _logger.info(self.aradial_url)
+        _logger.info(self.aradial_userbalance_url)
+        _logger.info(self.aradial_username)
+        _logger.info(self.aradial_password)
+
         updated_user = user.update_user()
 
         # _logger.info("User Creation: %s" % created_user)

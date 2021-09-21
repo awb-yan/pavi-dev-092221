@@ -30,12 +30,15 @@ class AradialAPIGatewayUpdateUser(object):
 
 
     def update_user(self):
+        _logger.info('function: update_user')
 
         # Update User's Product
         offer_data = {
             'Offer': self.data.Offer,
             'Status': 0
         }
+
+        _logger.info(f'Offer: {offer_data}')
 
         try:
             res = requests.put(
@@ -53,6 +56,8 @@ class AradialAPIGatewayUpdateUser(object):
         timebank_data = {
             'Timebank': self.data.Timebank
         }
+
+        _logger.info(f'Timebank: {timebank_data}')
 
         try:
             res = requests.post(

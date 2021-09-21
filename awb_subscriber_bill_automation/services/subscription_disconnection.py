@@ -80,20 +80,24 @@ class SubscriptionDisconnect(models.Model):
         return False
 
     def _change_status_subtype(self, records, status, is_closed_subs = False, executed=False):
+        _logger.info('function: _change_status_subtype')
         for record in records:
+            _logger.info(f'Record: {record}')
             if (
                 record.subscription_status != "disconnection"
                 or record.subscription_status_subtype != status
             ):
+                _logger.info(f'Update Status and Substatus')
                 record.write({
                     "subscription_status": "disconnection",
                     "subscription_status_subtype": status
                 })
                 if (is_closed_subs):
+                    _logger.info(f'Update Stage')
                     record.write({
                         "stage_id" : self.env['sale.subscription.stage'].search([("name", "=", "Closed")]).id,
                         "in_progress": False
                     })
                 executed = True
-
+        _logger.info(f'Executed: {executed}')
         return executed

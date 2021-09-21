@@ -173,7 +173,7 @@ class SubscriptionCreate(models.Model):
                 'LastName': last_name,
             }
 
-            _logger.debug(f'Updating aradial user with data= {self.data}')
+            _logger.info(f'Updating aradial user with data= {self.data}')
 
             try:
                 if not self.env['aradial.connector'].update_user(self.data):
