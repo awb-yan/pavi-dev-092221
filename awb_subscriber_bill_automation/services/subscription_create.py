@@ -185,7 +185,7 @@ class SubscriptionCreate(models.Model):
 
     def _start_subscription(self, record, max_retries):
 
-        _logger.info('function: start_subssubscription')
+        _logger.info('function: start_subscription')
 
         try:
             self.record = record;
@@ -252,4 +252,4 @@ class SubscriptionCreate(models.Model):
         elif offer == 'PREPAIDFBR30DAYS':
             return 30 * 86400
         
-        raise 0
+        return 0
