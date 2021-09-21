@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
-    def provision_and_activation(self, record, main_plan, last_subscription):
+    def provision_and_activation(self, record, main_plan, last_subscription, ctp):
         _logger.info('function: provision_and_activation')
 
         max_retries = 3
@@ -41,7 +41,7 @@ class SubscriptionCreate(models.Model):
         if aradial_flag:
             self._send_to_aradial(record, main_plan, max_retries, last_subscription)
 
-        self._start_subscription(record, max_retries)
+        self._start_subscription(record, max_retries, ctp)
 
        
     def _set_to_draft(self, record):
@@ -64,7 +64,6 @@ class SubscriptionCreate(models.Model):
 
         return 0
 
-
     def _provision_prepaid(self, record, last_subscription):
         _logger.info('function: provision_prepaid')
         
@@ -82,14 +81,8 @@ class SubscriptionCreate(models.Model):
             except:
                 _logger.warning('!!! Error sending Welcome Notification')
         else:
-            _logger.debug('Reloading')
-            # _logger.debug(' === Sending SMS CTP Notification ===')
-            # # CTP Provisioning Notification
-            # self.env["awb.sms.send"]._send_subscription_notif(
-            #     recordset=record,
-            #     template_name="Subscription Payment Notification",
-            #     state="Draft"
-            # )
+            _logger.debug('Reloading...')
+
 
     def _send_to_aradial(self, record, main_plan, max_retries, last_subscription):
         _logger.info('function: send_to_aradial')
@@ -113,14 +106,14 @@ class SubscriptionCreate(models.Model):
                     'CustomInfo3': record.customer_number,
                     'Offer': main_plan.default_code.upper(),
                     # 'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
-                    'Status': 0,
+                    'Status': '0',
                     'FirstName': first_name,
                     'LastName': last_name,
                     'ServiceType': 'Internet',
                     'PrepaidIndicator': 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0,
                 }
 
-                _logger.debug(self.data)
+                _logger.debug(f'Creating User with data: {self.data}')
 
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
@@ -152,7 +145,7 @@ class SubscriptionCreate(models.Model):
             self.data = {
                 'UserID': record.opportunity_id.jo_sms_id_username,
                 'Password': record.opportunity_id.jo_sms_id_password,
-                'Status': 0,
+                'Status': '0',
                 'Offer': main_plan.default_code.upper(),
                 'Timebank': self._getTimebank(main_plan.default_code.upper()),
                 'CustomInfo1': record.code,
@@ -168,29 +161,36 @@ class SubscriptionCreate(models.Model):
                 if not self.env['aradial.connector'].update_user(self.data):
                     raise Exception
             except:
-                _logger.error(f'!!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
-          
+                if max_retries > 1:
+                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription)
+                else:
+                    _logger.error(f'!!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+                    raise Exception(f'!!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
 
 
-    def _start_subscription(self, record, max_retries):
+    def _start_subscription(self, record, max_retries, ctp):
 
         _logger.info('function: start_subscription')
 
         try:
-            self.record = record;
-            now = datetime.now().strftime("%Y-%m-%d")
+            self.record = record
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self.record.write({
                 'date_start': now,
                 'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
                 'in_progress': True
             })
 
-            # Send activation Notification ----
+            # Send Activation or CTP Notification ----
+            smstemplate = "Subscription Activation Notification"
+            if ctp:
+                smstemplate = "Subscription CTP Notification"
+            
             try:            
-                _logger.info(' === Sending SMS Activation Notification ===')
+                _logger.info(f' === Sending {smstemplate} ===')
                 self.env["awb.sms.send"]._send_subscription_notif(
                     recordset=self.record,
-                    template_name="Subscription Activation Notification",
+                    template_name=smstemplate,
                     state="In Progress"
                 )
                 _logger.debug('Completed Sending Activation SMS')
@@ -203,7 +203,6 @@ class SubscriptionCreate(models.Model):
             else:
                 _logger.error(f'!!! Error encountered while starting subscription for {self.record.code}..')
                 raise Exception(f'!!! Error encountered while starting subscription for {self.record.code}..')
-
 
     def generate_atmref(self, record, max_retries):
 
@@ -225,7 +224,7 @@ class SubscriptionCreate(models.Model):
 
         except:
             if max_retries > 1:
-                self._generate_atmref(record, max_retries-1)
+                self.generate_atmref(record, max_retries-1)
             else:
                 _logger.error(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')
                 raise Exception(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')

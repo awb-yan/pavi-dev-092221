@@ -26,6 +26,7 @@ class SaleSubscription(models.Model):
                                             ('upgrade', 'Upgrade'),
                                             ('convert', 'Convert'),
                                             ('downgrade', 'Downgrade'),
+                                            ('transfer', 'Transfer'),
                                             ('re-contract', 'Re-contract'),
                                             ('pre-termination', 'Pre-Termination'),
                                             ('disconnection', 'Disconnection'),
@@ -41,6 +42,22 @@ class SaleSubscription(models.Model):
     product_desc = fields.Char("Products Description", compute='_get_subs_product_names')
     datetime_now = fields.Char("Date and Time", compute='_get_datetime_now')
 
+    # New Fields
+
+    plan_type = fields.Char(compute='_compute_plan_type')
+
+    # Business Logic
+
+    # TODO 
+    @api.depends('recurring_invoice_line_ids')
+    def _compute_plan_type(self):
+        for rec in self:
+            rec.plan_type = ''
+            for lines in rec.recurring_invoice_line_ids:
+                if lines.product_id.product_tmpl_id.product_segmentation == 'month_service':
+                    rec.plan_type = lines.product_id.product_tmpl_id.sf_plan_type.name
+
+
     @api.model
     def create(self, vals):
         # Commenting this for now
@@ -53,6 +70,7 @@ class SaleSubscription(models.Model):
         sms_flag = True
         plan_type = ''
         max_fail_retries = 3
+        ctp = False
 
         try:
             main_plan = self._get_mainplan(self.record)        
@@ -71,7 +89,8 @@ class SaleSubscription(models.Model):
             last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
 
             # CTP flow for prepaid, 
-            if last_subscription:   
+            if last_subscription:
+                ctp = True   
                 self.record = self._update_new_subscription(self.record, last_subscription)
                 # self.record.opportunity_id = last_subscription.opportunity_id
                 # Process System Discon
@@ -83,17 +102,17 @@ class SaleSubscription(models.Model):
                 except:
                     _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
 
-            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription)
+            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, ctp)
 
             # Helper to update Odoo Opportunity
-            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
-            
-        self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
+        if not ctp:
+            self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
 
         return res
 
-
+    # TODO For Clean up, refer to compute plan type
     def _get_mainplan(self, record):
         _logger.info('function: get_mainplan')
 
@@ -145,9 +164,10 @@ class SaleSubscription(models.Model):
                 raise Exception(f'!!! Failed SF Update Account Status - Subscription code {rec.code}')
     
     def _update_new_subscription(self, record, last_subscription):
-        _logger.info('function: _update_latest_subscription')
+        _logger.info('function: _update_new_subscription')
         self.record = record
         self.record['opportunity_id'] = last_subscription.opportunity_id
+        self.record['atm_ref'] = last_subscription.atm_ref
         self.env.cr.commit()
 
         return self.record
@@ -474,6 +494,7 @@ class SaleSubscription(models.Model):
            
             rec.product_names = ', '.join(products)
             rec.product_desc = ', '.join(desc)
+
 
     def _get_datetime_now(self):
         for rec in self:

@@ -26,6 +26,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "System, Voluntary"},
                 "od": {"name": "Odoo", "value": "disconnection-temporary"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": False,
                 "desc": "Subscriber Request",
                 "function": "_change_status_subtype"
             },
@@ -33,6 +34,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "System, Involuntary"},
                 "od": {"name": "Odoo", "value": "disconnection-temporary"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": True,
                 "desc": "Promo Expiry",
                 "function": "_change_status_subtype"
             },
@@ -40,6 +42,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "System, Involuntary"},
                 "od": {"name": "Odoo", "value": "disconnection-temporary"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": False,
                 "desc": "Bandwidth Usage Exceeded",
                 "function": "_change_status_subtype"
             },
@@ -47,6 +50,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "System, Involuntary"},
                 "od": {"name": "Odoo", "value": "disconnection-temporary"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": False,
                 "desc": "Billing Non-Payment",
                 "function": "_change_status_subtype"
             },
@@ -54,6 +58,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "Physical, Involuntary"},
                 "od": {"name": "Odoo", "value": "disconnection-permanent"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": False,
                 "desc": "Billing Non-Payment",
                 "function": "_change_status_subtype"
             },
@@ -61,6 +66,7 @@ class SubscriptionDisconnect(models.Model):
                 "sf": {"name": "Salesforce", "value": "Physical, Voluntary"},
                 "od": {"name": "Odoo", "value": "disconnection-permanent"},
                 "ar": {"name": "Aradial", "value": ""},
+                "subs_closed": False,
                 "desc": "Subscriber Request",
                 "function": "_change_status_subtype"
             },
@@ -73,6 +79,7 @@ class SubscriptionDisconnect(models.Model):
                 return {
                     "name": value.get("name"),
                     "status": value.get("value"),
+                    "subs_closed": discon_type.get("subs_closed"),
                     "description": discon_type.get("desc"),
                     "executable": discon_type.get("function")
                 }

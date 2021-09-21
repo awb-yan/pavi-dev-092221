@@ -1,5 +1,8 @@
 # Changelog
 
+## [13.0.1.0.1] - 2021-09-21
+- [IMP] Added code to update user in Aradial
+
 
 ## [13.0.1.0.0] - 2021-09-08
 

@@ -35,7 +35,8 @@ class AradialAPIGatewayUpdateUser(object):
         # Update User's Product
         offer_data = {
             'Offer': self.data['Offer'],
-            'Status': 0
+            'Status': '0',
+            'CustomInfo1':self.data['CustomInfo1']
         }
 
         try:
