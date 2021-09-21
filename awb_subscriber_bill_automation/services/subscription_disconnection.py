@@ -93,7 +93,7 @@ class SubscriptionDisconnect(models.Model):
                     "subscription_status": "disconnection",
                     "subscription_status_subtype": status
                 })
-                if (is_closed_subs):
+                if is_closed_subs:
                     _logger.info(f'Update Stage')
                     record.write({
                         "stage_id" : self.env['sale.subscription.stage'].search([("name", "=", "Closed")]).id,
