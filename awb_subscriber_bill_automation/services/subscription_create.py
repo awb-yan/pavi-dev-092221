@@ -33,14 +33,13 @@ class SubscriptionCreate(models.Model):
 
         # Plan Type Flow routing
         if plan_type == 'Postpaid':
-            add_to_timebank = self._provision_postpaid(record, last_subscription)
+            self._provision_postpaid(record, last_subscription)
         else:
-            add_to_timebank = self._provision_prepaid(record, last_subscription)
+            self._provision_prepaid(record, last_subscription)
 
-        _logger.debug(f'Add to Timebank: {add_to_timebank}')
         # Facility Type routing
         if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, add_to_timebank, last_subscription)
+            self._send_to_aradial(record, main_plan, max_retries, last_subscription)
 
         self._start_subscription(record, max_retries)
 
@@ -71,7 +70,6 @@ class SubscriptionCreate(models.Model):
         
         if not last_subscription:
             _logger.debug('First subscription')
-            remaining_seconds = 0
             try:
                 _logger.info(' === Sending SMS Welcome Notification ===')
                 # Welcome Provisioning Notification
@@ -85,9 +83,6 @@ class SubscriptionCreate(models.Model):
                 _logger.warning('!!! Error sending Welcome Notification')
         else:
             _logger.debug('Reloading')
-            # Check if still active, query remaining days in aradial
-            remaining_seconds = self.env['aradial.connector'].get_remaining_time(last_subscription.opportunity_id.jo_sms_id_username)
-
             # _logger.debug(' === Sending SMS CTP Notification ===')
             # # CTP Provisioning Notification
             # self.env["awb.sms.send"]._send_subscription_notif(
@@ -96,9 +91,7 @@ class SubscriptionCreate(models.Model):
             #     state="Draft"
             # )
 
-        return remaining_seconds
-
-    def _send_to_aradial(self, record, main_plan, max_retries, additional_time, last_subscription):
+    def _send_to_aradial(self, record, main_plan, max_retries, last_subscription):
         _logger.info('function: send_to_aradial')
         # New Subscription
         if not last_subscription:
@@ -125,8 +118,6 @@ class SubscriptionCreate(models.Model):
                     'LastName': last_name,
                     'ServiceType': 'Internet',
                     'PrepaidIndicator': 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0,
-                    'TimeBank': additional_time,
-                    'UseTimeBank': 1
                 }
 
                 _logger.debug(self.data)
@@ -138,7 +129,7 @@ class SubscriptionCreate(models.Model):
 
             except:
                 if max_retries > 1:
-                    self._send_to_aradial(record, main_plan, max_retries-1, additional_time, last_subscription)
+                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription)
                 else:
                     _logger.error(f'!!! Add to Failed transaction log - Subscription code {record.code}')
                     raise Exception(f'!!! Error Creating user in Aradial for {record.code}')
@@ -159,8 +150,6 @@ class SubscriptionCreate(models.Model):
                 last_name = ''
 
             self.data = {
-                'Page': 'UserEdit',
-                'Modify': 1,
                 'UserID': record.opportunity_id.jo_sms_id_username,
                 'Password': record.opportunity_id.jo_sms_id_password,
                 'Status': 0,

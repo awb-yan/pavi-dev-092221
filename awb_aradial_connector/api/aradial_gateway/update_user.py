@@ -51,30 +51,35 @@ class AradialAPIGatewayUpdateUser(object):
         except requests.exceptions.MissingSchema as e:
             raise exceptions.ValidationError(e)
 
-        # _logger.info(f'Update User\'s Offer: {res.json()}')
+        if res.status_code != 204:
+            update_offer_state = False
+            _logger.error('!!! Error Updating Offer to '+self.data['Offer']+' for Subscriber '+self.data['UserID'])
+        else:
+            update_offer_state = True
 
         # Update User's TimeBank
-        timebank_data = {
-            'TimeBank': self.data['Timebank']
-        }
+        if self.data['Timebank'] > 0:
+            timebank_data = {
+                'TimeBank': self.data['Timebank']
+            }
 
-        _logger.info(f'Timebank: {timebank_data}')
+            _logger.info(f'Timebank: {timebank_data}')
 
-        try:
-            res = requests.post(
-                url=self.userbalance_url+'/'+self.data['UserID'],
-                headers=self.headers,
-                data=json.dumps(timebank_data),
-                auth=HTTPBasicAuth(self.username, self.password)
-            )
-        except requests.exceptions.MissingSchema as e:
-            raise exceptions.ValidationError(e)
+            try:
+                res = requests.post(
+                    url=self.userbalance_url+'/'+self.data['UserID'],
+                    headers=self.headers,
+                    data=json.dumps(timebank_data),
+                    auth=HTTPBasicAuth(self.username, self.password)
+                )
+            except requests.exceptions.MissingSchema as e:
+                raise exceptions.ValidationError(e)
 
-        # _logger.info(f'Update User\'s Timebank: {res.json()}')
+            if res.status_code != 201:
+                update_timebank_state = False
+                _logger.error('!!! Error Adding to TimeBank for Subscriber '+self.data['UserID'])
+            else:
+                update_timebank_state = True
 
-        
-        state = True if res.status_code == 201 else False
-        _logger.info("response [%s]" % res)
-
-        return state
+        return True if update_offer_state and update_timebank_state else False
 
