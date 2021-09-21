@@ -51,7 +51,7 @@ class AradialAPIGatewayUpdateUser(object):
         except requests.exceptions.MissingSchema as e:
             raise exceptions.ValidationError(e)
 
-        _logger.info(f'Update User\'s Offer: {res.json()}')
+        # _logger.info(f'Update User\'s Offer: {res.json()}')
 
         # Update User's TimeBank
         timebank_data = {
@@ -70,7 +70,7 @@ class AradialAPIGatewayUpdateUser(object):
         except requests.exceptions.MissingSchema as e:
             raise exceptions.ValidationError(e)
 
-        _logger.info(f'Update User\'s Timebank: {res.json()}')
+        # _logger.info(f'Update User\'s Timebank: {res.json()}')
 
         
         state = True if res.status_code == 201 else False
