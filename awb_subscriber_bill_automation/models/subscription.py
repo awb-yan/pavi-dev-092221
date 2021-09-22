@@ -143,7 +143,7 @@ class SaleSubscription(models.Model):
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
-            _logger.debug(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
+            _logger.info(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
 
         return last_subscription
 
