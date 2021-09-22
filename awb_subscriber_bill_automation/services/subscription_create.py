@@ -105,7 +105,6 @@ class SubscriptionCreate(models.Model):
                     'CustomInfo2': record.subscriber_location_id.name,
                     'CustomInfo3': record.customer_number,
                     'Offer': main_plan.default_code.upper(),
-                    # 'StartDate': record.date_start.strftime("%m/%d/%Y, %H:%M:%S"),
                     'Status': '0',
                     'FirstName': first_name,
                     'LastName': last_name,
@@ -128,9 +127,7 @@ class SubscriptionCreate(models.Model):
                     raise Exception(f'!!! Error Creating user in Aradial for {record.code}')
 
         else:   # CTP - Update User's TimeBank
-            # 2 options to handle this:
-            #     1. Update the Offer of the User in Aradial (does it add up the remaining timebank?)
-            #     2. Get the remaining time and delete the user in Aradial, create new user with the additional_time
+
             _logger.info(f'Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
     
             # for Residential
@@ -144,10 +141,8 @@ class SubscriptionCreate(models.Model):
 
             self.data = {
                 'UserID': record.opportunity_id.jo_sms_id_username,
-                'Password': record.opportunity_id.jo_sms_id_password,
                 'Status': '0',
                 'Offer': main_plan.default_code.upper(),
-                'Timebank': self._getTimebank(main_plan.default_code.upper()),
                 'CustomInfo1': record.code,
                 'CustomInfo2': record.subscriber_location_id.name,
                 'CustomInfo3': record.customer_number,
@@ -228,16 +223,3 @@ class SubscriptionCreate(models.Model):
             else:
                 _logger.error(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')
                 raise Exception(f'!!! Error encountered while generating atm reference for subscription {self.record.code}..')
-
-    def _getTimebank(self, offer):
-
-        if offer == 'PREPAIDFBR5DAYS':
-            return 5 * 86400
-        elif offer == 'PREPAIDFBR10DAYS':
-            return 10 * 86400
-        elif offer == 'PREPAIDFBR15DAYS':
-            return 15 * 86400
-        elif offer == 'PREPAIDFBR30DAYS':
-            return 30 * 86400
-        
-        return 0
