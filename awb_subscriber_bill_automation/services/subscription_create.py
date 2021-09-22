@@ -99,15 +99,17 @@ class SubscriptionCreate(models.Model):
                     last_name = ''
 
                 self.data = {
-                    'UserID': record.opportunity_id.jo_sms_id_username,
-                    'Password': record.opportunity_id.jo_sms_id_password,
+                    # 'UserID': record.opportunity_id.jo_sms_id_username,
+                    # 'Password': record.opportunity_id.jo_sms_id_password,
+                    'UserID': '173416',
+                    'Password': '139595',
                     'CustomInfo1': record.code,
                     'CustomInfo2': record.subscriber_location_id.name,
                     'CustomInfo3': record.customer_number,
-                    'Offer': main_plan.default_code.upper(),
+                    'Offer': 'PREPAIDFREE30DAYS',
                     'Status': '0',
-                    'FirstName': first_name,
-                    'LastName': last_name,
+                    'FirstName': 'Yan',
+                    'LastName': 'Dizon',
                     'ServiceType': 'Internet',
                     'PrepaidIndicator': 1 if main_plan.sf_plan_type.name == 'Prepaid' else 0,
                 }
