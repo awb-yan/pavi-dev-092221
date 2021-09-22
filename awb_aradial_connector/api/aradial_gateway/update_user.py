@@ -2,6 +2,7 @@ import json
 import requests
 from odoo import exceptions
 from requests.auth import HTTPBasicAuth
+from .get_user import AradialAPIGatewayGetUser
 
 import logging
 
@@ -55,29 +56,34 @@ class AradialAPIGatewayUpdateUser(object):
         else:
             update_offer_state = True
 
-        # Update User's TimeBank
-        # if self.data['Timebank'] > 0:
-        #     timebank_data = {
-        #         'TimeBank': self.data['Timebank']
-        #     }
 
-        #     try:
-        #         res = requests.post(
-        #             url=self.userbalance_url+'/'+self.data['UserID'],
-        #             headers=self.headers,
-        #             data=json.dumps(timebank_data),
-        #             auth=HTTPBasicAuth(self.username, self.password)
-        #         )
-        #     except requests.exceptions.MissingSchema as e:
-        #         raise exceptions.ValidationError(e)
+        gateway = AradialAPIGatewayGetUser(self.url, self.username, self.password)
+        user = gateway.get_user(self.data['UserID'])
 
-        #     if res.status_code != 201:
-        #         update_timebank_state = False
-        #         _logger.error('!!! Error Adding to TimeBank for Subscriber '+self.data['UserID'])
-        #     else:
-        #         update_timebank_state = True
-        # 
-        # return True if update_offer_state and update_timebank_state else False
+        if user['Offer'] == self.data['Offer']:
+            # Update User's TimeBank
+            if self.data['Timebank'] > 0:
+                timebank_data = {
+                    'TimeBank': self.data['Timebank']
+                }
+
+                try:
+                    res = requests.post(
+                        url=self.userbalance_url+'/'+self.data['UserID'],
+                        headers=self.headers,
+                        data=json.dumps(timebank_data),
+                        auth=HTTPBasicAuth(self.username, self.password)
+                    )
+                except requests.exceptions.MissingSchema as e:
+                    raise exceptions.ValidationError(e)
+
+                if res.status_code != 201:
+                    update_timebank_state = False
+                    _logger.error('!!! Error Adding to TimeBank for Subscriber '+self.data['UserID'])
+                else:
+                    update_timebank_state = True
+            
+            return True if update_offer_state and update_timebank_state else False
 
         return True if update_offer_state else False
 
