@@ -44,7 +44,7 @@ class SaleSubscription(models.Model):
 
     # New Fields
 
-    plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type')
+    plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type', store=True)
 
     # Business Logic
 
@@ -132,7 +132,7 @@ class SaleSubscription(models.Model):
 
 
     def _get_last_subscription(self, record, plan_type):
-        _logger.info('function: checkLastActiveSubs')
+        _logger.info('function: _get_last_subscription')
         customer_id = record.customer_number
 
         _logger.debug(f'Subscription Code: {record.code}')
@@ -143,7 +143,7 @@ class SaleSubscription(models.Model):
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
-            _logger.info(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
+            _logger.debug(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
 
         return last_subscription
 

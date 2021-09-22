@@ -23,7 +23,7 @@
 
     'version': '13.0.1.4.1',
 
-    'depends': ['sale_management', 'sale_subscription'],
+    'depends': ['sale_management', 'sale_subscription', 'streamtech_salesforce_connector'],
 
     'data': [
         'security/ir.model.access.csv',

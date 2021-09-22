@@ -29,9 +29,9 @@ class ProductPlanType(models.Model):
 class CustomResPartner(models.Model):
     _inherit = 'res.partner'
 
-    plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type')
+    plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type', store=True)
 
-    @api.depends('opportunity_count')
+    @api.depends('opportunity_ids')
     def _compute_plan_type(self):
         for rec in self:
             plan_type_id = []
