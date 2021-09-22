@@ -44,18 +44,20 @@ class SaleSubscription(models.Model):
 
     # New Fields
 
-    plan_type = fields.Char(compute='_compute_plan_type')
+    plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type')
 
     # Business Logic
 
-    # TODO 
     @api.depends('recurring_invoice_line_ids')
     def _compute_plan_type(self):
         for rec in self:
-            rec.plan_type = ''
+            plan_type_id = []
             for lines in rec.recurring_invoice_line_ids:
                 if lines.product_id.product_tmpl_id.product_segmentation == 'month_service':
-                    rec.plan_type = lines.product_id.product_tmpl_id.sf_plan_type.name
+                    plan_type_id = lines.product_id.product_tmpl_id.sf_plan_type
+                    # plan_type_result = self.env['product.plan.type'].search([('id','=',plan_type_id)])
+
+            rec.plan_type = plan_type_id
 
 
     @api.model
@@ -91,6 +93,7 @@ class SaleSubscription(models.Model):
             # CTP flow for prepaid, 
             if last_subscription:
                 ctp = True   
+                
                 self.record = self._update_new_subscription(self.record, last_subscription)
                 # self.record.opportunity_id = last_subscription.opportunity_id
                 # Process System Discon
@@ -98,26 +101,14 @@ class SaleSubscription(models.Model):
                 try:
                     is_closed_subs = True
                     subtype = "disconnection-temporary"
-                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs)
+                    self.env['sale.subscription']._change_status_subtype(last_subscription, subtype, is_closed_subs, ctp)
                 except:
                     _logger.error(f'!!! Failed Temporary Discon - Subscription code {self.record.code}')
-                
-                try:            
-                    _logger.info(f' === Sending Expiry Notification ===')
-                    self.env["awb.sms.send"]._send_subscription_notif(
-                        recordset=self.record,
-                        template_name="Subscription Expiry Notification",
-                        state="Closed"
-                    )
-                    _logger.debug('Completed Sending Expiry Notification')
-                except:
-                    _logger.warning('!!! Error sending Expiry Notification')
-
 
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, ctp)
 
             # Helper to update Odoo Opportunity
-            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
@@ -147,7 +138,7 @@ class SaleSubscription(models.Model):
         _logger.debug(f'Subscription Code: {record.code}')
         _logger.debug(f'Customer Number: {customer_id}')
 
-        activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id),('subscription_status', '!=', 'disconnection')], order='id desc')
+        activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id)], order='id desc', limit=2)
 
         # Checking for existing subscriptions
         # For Postpaid, only one subscription at a time is allowed
@@ -177,11 +168,14 @@ class SaleSubscription(models.Model):
     
     def _update_new_subscription(self, record, last_subscription):
         _logger.info('function: _update_new_subscription')
+
         self.record = record
-        self.record['opportunity_id'] = last_subscription.opportunity_id
+        self.record['opportunity_id'] = last_subscription.opportunity_id.id
         self.record['atm_ref'] = last_subscription.atm_ref
+        
         self.env.cr.commit()
 
+        _logger.debug(f'New Subscription: {self.record}')
         return self.record
 
 

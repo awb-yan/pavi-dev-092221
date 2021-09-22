@@ -174,7 +174,7 @@ class SubscriptionCreate(models.Model):
 
         try:
             self.record = record
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            now = datetime.now().strftime("%Y-%m-%d")
             self.record.write({
                 'date_start': now,
                 'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
@@ -193,9 +193,9 @@ class SubscriptionCreate(models.Model):
                     template_name=smstemplate,
                     state="In Progress"
                 )
-                _logger.debug('Completed Sending Activation SMS')
+                _logger.debug(f'Completed Sending {smstemplate}')
             except:
-                _logger.warning('!!! Error sending Activation Notification')
+                _logger.warning(f'!!! Error sending {smstemplate}')
 
         except:
             if max_retries > 1:

@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from datetime import datetime
 
 import logging
 
@@ -13,11 +14,26 @@ class SalesForceConnector(models.Model):
         
         if record:
             self.data = {}
-            if update_type == 6:
+            if update_type == 1:
+                _logger.info('Entered update_type equal to 1')
+                self.data = {
+                    'SFID': record.opportunity_id.salesforce_id,
+                    'BillCustomerID': record.customer_number,
+                    'UpdateType': update_type
+                }
+            elif update_type == 5:
+                _logger.info('Entered update_type equal to 5')
+                self.data = {
+                    'SFID': record.opportunity_id.salesforce_id,
+                    'AccountStatus': "Disconnected",
+                    'AccountsubType': "Voluntary/Physical Disconnected",
+                    'UpdateType': update_type
+                }
+            elif update_type == 6:
                 _logger.info('Entered update_type equal to 6')
                 self.data = {
                     'SFID': record.opportunity_id.salesforce_id,
-                    'SMS_Activation_Date_Time': record.date_start.strftime("%m/%d/%Y %I:%M%p"),
+                    'SMS_Activation_Date_Time': datetime.now().strftime("%m/%d/%Y %I:%M%p"),
                     'SubscriptionCode': record.code,
                     'AccountStatus': "Active",
                     'ProductCode': main_plan.default_code.upper(),
