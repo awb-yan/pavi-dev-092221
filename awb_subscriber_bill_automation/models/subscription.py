@@ -88,7 +88,7 @@ class SaleSubscription(models.Model):
 
         if sms_flag and plan_type == 'Prepaid':
             sf_update_type = 6
-            last_subscription = self._checkLastActiveSubscription(self.record, plan_type)
+            last_subscription = self._get_last_subscription(self.record, plan_type)
 
             # CTP flow for prepaid, 
             if last_subscription:
@@ -131,30 +131,21 @@ class SaleSubscription(models.Model):
         return main_plan  
 
 
-    def _checkLastActiveSubscription(self, record, plan_type):
+    def _get_last_subscription(self, record, plan_type):
         _logger.info('function: checkLastActiveSubs')
         customer_id = record.customer_number
 
         _logger.debug(f'Subscription Code: {record.code}')
         _logger.debug(f'Customer Number: {customer_id}')
 
-        activeSubs = self.env['sale.subscription'].search([('customer_number','=', customer_id)], order='id desc', limit=2)
+        last_subscription = False
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
+        
+        if len(subscriptions) == 2:
+            last_subscription = subscriptions[1]
+            _logger.debug(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
 
-        # Checking for existing subscriptions
-        # For Postpaid, only one subscription at a time is allowed
-        # For Prepaid, multiple subscriptions are allowed; however, to avoid confusion, only 2 at a time will be allowed
-        if plan_type == 'Postpaid':
-            if len(activeSubs) >= 2:
-                _logger.warning(f'!!! Multiple Postpaid subscription not allowed for Customer {customer_id}')
-            else:
-                return False
-        else:
-            if len(activeSubs) > 2:
-                _logger.error(f'!!! Multiple prepaid subscription found for Customer {customer_id}')
-            elif len(activeSubs) == 2:
-                return activeSubs[1]
-            else:
-                return False
+        return last_subscription
 
     def _update_account(self, main_plan, rec, sf_update_type, max_retries):
         try:
