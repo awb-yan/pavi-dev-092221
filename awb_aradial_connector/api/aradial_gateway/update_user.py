@@ -78,5 +78,6 @@ class AradialAPIGatewayUpdateUser(object):
         #         update_timebank_state = True
 
         # return True if update_offer_state and update_timebank_state else False
+        
         return True if update_offer_state else False
 
