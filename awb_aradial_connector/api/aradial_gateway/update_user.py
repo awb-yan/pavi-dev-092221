@@ -45,5 +45,5 @@ class AradialAPIGatewayUpdateUser(object):
             _logger.error('!!! Error Updating Offer to '+self.data['Offer']+' for Subscriber '+self.data['UserID'])
         else:
             update_state = True
-  
+
         return update_state

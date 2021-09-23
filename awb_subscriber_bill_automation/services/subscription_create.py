@@ -157,15 +157,15 @@ class SubscriptionCreate(models.Model):
 
             _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
 
-            # try:
-            #     if not self.env['aradial.connector'].update_user(self.data):
-            #         raise Exception
-            # except:
-            #     if max_retries > 1:
-            #         self._send_to_aradial(record, main_plan, max_retries-1, last_subscription)
-            #     else:
-            #         _logger.error(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
-            #         raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+            try:
+                if not self.env['aradial.connector'].update_user(self.data):
+                    raise Exception
+            except:
+                if max_retries > 1:
+                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription)
+                else:
+                    _logger.error(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+                    raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
 
 
     def _start_subscription(self, record, max_retries, ctp):
