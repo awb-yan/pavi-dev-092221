@@ -21,9 +21,9 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.4.1',
+    'version': '13.0.1.4.2',
 
-    'depends': ['sale_management', 'sale_subscription', 'streamtech_salesforce_connector'],
+    'depends': ['sale_management', 'sale_subscription'],
 
     'data': [
         'security/ir.model.access.csv',

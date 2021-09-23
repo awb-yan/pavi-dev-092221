@@ -35,6 +35,6 @@ class AradialAPIGatewayGetUser(object):
         if res.status_code == 200:
 
             response = res.json()
-            return response
+            return response['TimeBank']
         else:
-            return False
+            return 0
