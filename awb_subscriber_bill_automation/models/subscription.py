@@ -502,14 +502,10 @@ class SaleSubscription(models.Model):
     def _get_datetime_now(self):
         _logger.info(f'SMS:: function: _get_datetime_now')    
         try:
-            # timezone = self.env.user.tz or pytz.utc
-            # now = datetime.now(pytz.timezone(timezone))
-
             # Current time in UTC
             now_utc = datetime.now(timezone('UTC'))
             # Convert to Asia/Manila time zone
             now = now_utc.astimezone(timezone('Asia/Manila'))
-
             for rec in self:
                 rec.datetime_now = now.strftime("%m/%d/%Y %I:%M %p")
                 _logger.debug(f'SMS::rec.datetime_now {rec.datetime_now}')
