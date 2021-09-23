@@ -168,6 +168,7 @@ class SubscriptionCreate(models.Model):
             #         raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
 
 
+
     def _start_subscription(self, record, max_retries, ctp):
 
         _logger.info('SMS:: function: start_subscription')
