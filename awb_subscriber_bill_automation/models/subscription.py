@@ -56,7 +56,7 @@ class SaleSubscription(models.Model):
             plan_type_id = []
             for lines in rec.recurring_invoice_line_ids:
                 if lines.product_id.product_tmpl_id.product_segmentation == 'month_service':
-                    plan_type_id = lines.product_id.product_tmpl_id.sf_plan_type.name
+                    plan_type_id = lines.product_id.product_tmpl_id.sf_plan_type
                     # plan_type_result = self.env['product.plan.type'].search([('id','=',plan_type_id)])
 
             rec.plan_type = plan_type_id
@@ -82,14 +82,14 @@ class SaleSubscription(models.Model):
 
             # plan_type = main_plan.sf_plan_type.name
             # if plan_type == 'Postpaid':
-            if self.record.plan_type == 'Postpaid':
+            if self.record.plan_type.name == 'Postpaid':
                 sms_flag = False
 
         except:
             _logger.warning("SMS:: Main Plan not found")
             sms_flag = False
 
-        if sms_flag and self.record.plan_type == 'Prepaid':
+        if sms_flag and self.record.plan_type.name == 'Prepaid':
             sf_update_type = 6
             last_subscription = self._get_last_subscription(self.record)
             last_subs_main_plan = self._get_mainplan(last_subscription)        

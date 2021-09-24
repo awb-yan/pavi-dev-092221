@@ -27,11 +27,11 @@ class SubscriptionCreate(models.Model):
         self._set_to_draft(record)
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
-        _logger.debug(f'SMS:: Plan Type: {self.record.plan_type}')
+        _logger.debug(f'SMS:: Plan Type: {self.record.plan_type.name}')
         _logger.debug(f'SMS:: Aradial Flag: {aradial_flag}')
 
         # Plan Type Flow routing
-        if self.record.plan_type == 'Postpaid':
+        if self.record.plan_type.name == 'Postpaid':
             self._provision_postpaid(record, ctp)
         else:
             self._provision_prepaid(record, ctp)
