@@ -49,13 +49,13 @@ class AradialAPIGatewayUpdateUser(object):
 
         return update_state
 
-    def update_timebank(self):
+    def update_timebank(self, UserID):
         _logger.info('function: update_timebank')
 
         update_state = True
         try:
             res = requests.post(
-                url=self.balance_url+'/'+self.data.UserID,
+                url=self.balance_url+'/'+UserID,
                 headers=self.headers,
                 data=json.dumps(self.data),
                 auth=HTTPBasicAuth(self.username, self.password)
