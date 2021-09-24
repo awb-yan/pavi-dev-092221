@@ -96,6 +96,8 @@ class SaleSubscription(models.Model):
             if last_subscription:
                 ctp = True   
                 last_subs_main_plan = self._get_mainplan(last_subscription)        
+
+                _logger.info(f'Last Subscription Main Plan: {last_subs_main_plan}')
                 
                 self.record = self._update_new_subscription(self.record, last_subscription)
                 # self.record.opportunity_id = last_subscription.opportunity_id
