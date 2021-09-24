@@ -142,6 +142,7 @@ class SubscriptionCreate(models.Model):
                 'UserID': record.opportunity_id.jo_sms_id_username,
                 'Offer': main_plan.default_code.upper(),
                 'Status': '0',
+                'TimeBank': self._getTimebank(main_plan.default_code.upper()),
                 'CustomInfo1': record.code,
                 'CustomInfo2': record.subscriber_location_id.name,
                 'CustomInfo3': record.customer_number,
