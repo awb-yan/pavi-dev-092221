@@ -80,18 +80,17 @@ class SaleSubscription(models.Model):
             main_plan = self._get_mainplan(self.record)        
             _logger.info(f'SMS::Main_Plan: {main_plan}')
 
-            # plan_type = main_plan.sf_plan_type.name
-            # if plan_type == 'Postpaid':
-            if self.record.plan_type.name == 'Postpaid':
+            plan_type = main_plan.sf_plan_type.name
+            if plan_type == 'Postpaid':
                 sms_flag = False
 
         except:
             _logger.warning("SMS:: Main Plan not found")
             sms_flag = False
 
-        if sms_flag and self.record.plan_type.name == 'Prepaid':
+        if sms_flag and plan_type == 'Prepaid':
             sf_update_type = 6
-            last_subscription = self._get_last_subscription(self.record)
+            last_subscription = self._get_last_subscription(self.record, plan_type)
             last_subs_main_plan = self._get_mainplan(last_subscription)        
 
             # CTP flow for prepaid, 
@@ -135,7 +134,7 @@ class SaleSubscription(models.Model):
         return main_plan  
 
 
-    def _get_last_subscription(self, record):
+    def _get_last_subscription(self, record, plan_type):
         _logger.info('SMS:: function: _get_last_subscription')
         customer_id = record.customer_number
 
@@ -144,7 +143,7 @@ class SaleSubscription(models.Model):
         _logger.info(f'SMS:: Customer Number: {customer_id}')
 
         last_subscription = False
-        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', record.plan_type.name)], order='id desc', limit=2)
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]

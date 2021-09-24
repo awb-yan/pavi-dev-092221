@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
-    def provision_and_activation(self, record, main_plan, last_subscription, last_subs_main_plan, ctp):
+    def provision_and_activation(self, record, main_plan, last_subscription, plan_type, ctp):
         _logger.info('SMS:: function: provision_and_activation')
 
         max_retries = 3
@@ -31,14 +31,14 @@ class SubscriptionCreate(models.Model):
         _logger.debug(f'SMS:: Aradial Flag: {aradial_flag}')
 
         # Plan Type Flow routing
-        if self.record.plan_type.name == 'Postpaid':
+        if plan_type == 'Postpaid':
             self._provision_postpaid(record, ctp)
         else:
             self._provision_prepaid(record, ctp)
 
         # Facility Type routing
         if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, ctp)
+            self._send_to_aradial(record, main_plan, max_retries, last_subscription, ctp)
 
         self._start_subscription(record, max_retries, ctp)
 
@@ -109,7 +109,7 @@ class SubscriptionCreate(models.Model):
                     'FirstName': first_name,
                     'LastName': last_name,
                     'ServiceType': 'Internet',
-                    'PrepaidIndicator': 1 if record.plan_type.name == 'Prepaid' else 0,
+                    'PrepaidIndicator': 1 if plan_type == 'Prepaid' else 0,
                 }
 
                 _logger.debug(f'SMS:: Creating User with data: {self.data}')
