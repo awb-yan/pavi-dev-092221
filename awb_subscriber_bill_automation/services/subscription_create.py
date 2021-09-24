@@ -156,7 +156,7 @@ class SubscriptionCreate(models.Model):
                 _logger.info(f'SMS:: Updating aradial user\'s Timebank = {self.data}')
 
                 try:
-                    if not self.env['aradial.connector'].update_user(self.data, record.opportunity_id.jo_sms_id_username, 2):
+                    if not self.env['aradial.connector'].update_user(self.data, 2, record.opportunity_id.jo_sms_id_username):
                         raise Exception
                 except:
                     if max_retries > 1:

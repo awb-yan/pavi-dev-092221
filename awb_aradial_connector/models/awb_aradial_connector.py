@@ -65,8 +65,8 @@ class AWBAradialConnector(models.Model):
     def update_user(
         self, 
         data,
-        UserID,
-        update_code
+        update_code,
+        UserID=False
     ):
         _logger.info("Update User")
         
