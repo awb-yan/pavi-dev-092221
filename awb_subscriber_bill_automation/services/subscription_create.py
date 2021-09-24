@@ -27,8 +27,8 @@ class SubscriptionCreate(models.Model):
         self._set_to_draft(record)
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
-        _logger.debug(f'SMS:: Plan Type: {self.record.plan_type.name}')
-        _logger.debug(f'SMS:: Aradial Flag: {aradial_flag}')
+        _logger.info(f'SMS:: Plan Type: {self.record.plan_type.name}')
+        _logger.info(f'SMS:: Aradial Flag: {aradial_flag}')
 
         # Plan Type Flow routing
         if plan_type == 'Postpaid':
@@ -55,10 +55,10 @@ class SubscriptionCreate(models.Model):
     # TODO: update Postpaid provisioning
     def _provision_postpaid(self, record, ctp):
         if not ctp:
-            _logger.debug('SMS:: first')
+            _logger.info('SMS:: first')
             # Welcome Provisioning Notification
         else:
-            _logger.debug('SMS:: last')
+            _logger.info('SMS:: last')
             # Returning Subscriber Notification
 
         return 0
@@ -67,7 +67,7 @@ class SubscriptionCreate(models.Model):
         _logger.info('SMS:: function: provision_prepaid')
         
         if not ctp:
-            _logger.debug('SMS:: First subscription')
+            _logger.info('SMS:: First subscription')
             try:
                 _logger.info(' === Sending SMS Welcome Notification ===')
                 # Welcome Provisioning Notification
@@ -76,18 +76,18 @@ class SubscriptionCreate(models.Model):
                     template_name="Subscription Welcome Notification",
                     state="Draft"
                 )
-                _logger.debug('SMS:: Completed Sending Welcome SMS')
+                _logger.info('SMS:: Completed Sending Welcome SMS')
             except:
                 _logger.warning('SMS:: !!! Error sending Welcome Notification')
         else:
-            _logger.debug('SMS:: Reloading...')
+            _logger.info('SMS:: Reloading...')
 
 
     def _send_to_aradial(self, record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp):
         _logger.info('SMS:: function: send_to_aradial')
         # New Subscription
         if not ctp:
-            _logger.debug('SMS:: CTP: New Subscriber')
+            _logger.info('SMS:: CTP: New Subscriber')
             try:
                 # for Residential
                 first_name = record.partner_id.first_name
@@ -112,7 +112,7 @@ class SubscriptionCreate(models.Model):
                     'PrepaidIndicator': 1 if plan_type == 'Prepaid' else 0,
                 }
 
-                _logger.debug(f'SMS:: Creating User with data: {self.data}')
+                _logger.info(f'SMS:: Creating User with data: {self.data}')
 
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
@@ -130,7 +130,7 @@ class SubscriptionCreate(models.Model):
             _logger.info(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
     
             if last_subs_main_plan.default_code.upper() == main_plan.default_code.upper():
-                _logger.debug('SMS:: CTP: Same Product')
+                _logger.info('SMS:: CTP: Same Product')
                 self.data = {
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'TimeBank' : self._getTimebank(main_plan.default_code.upper()),
@@ -148,7 +148,7 @@ class SubscriptionCreate(models.Model):
                         raise Exception(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
 
             else:
-                _logger.debug('SMS:: CTP: Different Product')
+                _logger.info('SMS:: CTP: Different Product')
 
                 # for Residential
                 first_name = record.partner_id.first_name
@@ -208,7 +208,7 @@ class SubscriptionCreate(models.Model):
                     template_name=smstemplate,
                     state="In Progress"
                 )
-                _logger.debug(f'SMS:: Completed Sending {smstemplate}')
+                _logger.info(f'SMS:: Completed Sending {smstemplate}')
             except:
                 _logger.warning(f'SMS:: !!! Error sending {smstemplate}')
 
