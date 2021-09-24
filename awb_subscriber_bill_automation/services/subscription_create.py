@@ -131,6 +131,7 @@ class SubscriptionCreate(models.Model):
     
             if last_subs_main_plan.default_code.upper() == main_plan.default_code.upper():
                 _logger.info('SMS:: CTP: Same Product')
+                _logger.info(main_plan.default_code.upper())
                 self.data = {
                     'UserID': record.opportunity_id.jo_sms_id_username,
                     'TimeBank' : self._getTimebank(main_plan.default_code.upper()),
