@@ -51,6 +51,7 @@ class AradialAPIGatewayUpdateUser(object):
 
     def update_timebank(self, UserID):
         _logger.info('function: update_timebank')
+        _logger.info(self.data)
 
         update_state = True
         try:
