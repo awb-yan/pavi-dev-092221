@@ -91,11 +91,11 @@ class SaleSubscription(models.Model):
         if sms_flag and plan_type == 'Prepaid':
             sf_update_type = 6
             last_subscription = self._get_last_subscription(self.record, plan_type)
-            last_subs_main_plan = self._get_mainplan(last_subscription)        
 
             # CTP flow for prepaid, 
             if last_subscription:
                 ctp = True   
+                last_subs_main_plan = self._get_mainplan(last_subscription)        
                 
                 self.record = self._update_new_subscription(self.record, last_subscription)
                 # self.record.opportunity_id = last_subscription.opportunity_id
