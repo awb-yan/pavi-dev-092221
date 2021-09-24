@@ -11,12 +11,14 @@ class AradialAPIGatewayUpdateUser(object):
     def __init__(
         self,
         url,
+        userbalance_url,
         username,
         password,
         data
     ):
 
         self.url = url
+        self.userbalance_url = userbalance_url
         self.username = username
         self.password = password
 
@@ -30,6 +32,7 @@ class AradialAPIGatewayUpdateUser(object):
     def update_user(self):
         _logger.info('function: update_user')
 
+        update_state = True
         try:
             res = requests.put(
                 url=self.url+'/'+self.data['UserID'],
@@ -43,7 +46,25 @@ class AradialAPIGatewayUpdateUser(object):
         if res.status_code != 204:
             update_state = False
             _logger.error('!!! Error Updating Offer to '+self.data['Offer']+' for Subscriber '+self.data['UserID'])
-        else:
-            update_state = True
+
+        return update_state
+
+    def update_timebank(self):
+        _logger.info('function: update_timebank')
+
+        update_state = True
+        try:
+            res = requests.post(
+                url=self.userbalance_url+'/'+self.data.UserID,
+                headers=self.headers,
+                data=json.dumps(self.data),
+                auth=HTTPBasicAuth(self.username, self.password)
+            )
+        except requests.exceptions.MissingSchema as e:
+            raise exceptions.ValidationError(e)
+
+        if res.status_code != 201:
+            update_state = False
+            _logger.error('!!! Error Updating TimeBank to '+self.data['TimeBank']+' for Subscriber '+self.data['UserID'])
 
         return update_state

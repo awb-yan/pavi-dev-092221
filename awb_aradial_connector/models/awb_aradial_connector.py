@@ -64,23 +64,29 @@ class AWBAradialConnector(models.Model):
 
     def update_user(
         self, 
-        data
+        data,
+        update_code
     ):
         _logger.info("Update User")
         
         params = self.env['ir.config_parameter'].sudo()
         self.aradial_url = params.get_param('aradial_url')
+        self.aradial_balance_url = params.get_param('aradial_balance_url')
         self.aradial_username = params.get_param('aradial_username')
         self.aradial_password = params.get_param('aradial_password')
 
         user = AradialAPIGatewayUpdateUser(
             url=self.aradial_url,
+            balance_url = self.aradial_balance_url,
             username=self.aradial_username,
             password=self.aradial_password,
             data=data
         )
-
-        updated_user = user.update_user()
-
+        if update_code == 1:
+            updated_user = user.update_user()
+        elif update_code == 2:
+            updated_user = user.update_timebank()
+        
         return updated_user        
+
     

@@ -80,17 +80,18 @@ class SaleSubscription(models.Model):
             main_plan = self._get_mainplan(self.record)        
             _logger.debug(f'SMS::Main_Plan: {main_plan}')
 
-            plan_type = main_plan.sf_plan_type.name
-            if plan_type == 'Postpaid':
+            # plan_type = main_plan.sf_plan_type.name
+            # if plan_type == 'Postpaid':
+            if self.record.plan_type == 'Postpaid':
                 sms_flag = False
 
         except:
             _logger.warning("SMS:: Main Plan not found")
             sms_flag = False
 
-        if sms_flag and plan_type == 'Prepaid':
+        if sms_flag and self.record.plan_type == 'Prepaid':
             sf_update_type = 6
-            last_subscription = self._get_last_subscription(self.record, plan_type)
+            last_subscription = self._get_last_subscription(self.record)
 
             # CTP flow for prepaid, 
             if last_subscription:
@@ -110,7 +111,7 @@ class SaleSubscription(models.Model):
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, ctp)
 
             # Helper to update Odoo Opportunity
-            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
@@ -133,7 +134,7 @@ class SaleSubscription(models.Model):
         return main_plan  
 
 
-    def _get_last_subscription(self, record, plan_type):
+    def _get_last_subscription(self, record):
         _logger.info('SMS:: function: _get_last_subscription')
         customer_id = record.customer_number
 
@@ -142,7 +143,7 @@ class SaleSubscription(models.Model):
         _logger.debug(f'SMS:: Customer Number: {customer_id}')
 
         last_subscription = False
-        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', record.plan_type)], order='id desc', limit=2)
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
@@ -503,13 +504,12 @@ class SaleSubscription(models.Model):
         _logger.info(f'SMS:: function: _get_datetime_now')    
         try:
             # timezone = self.env.user.tz or pytz.utc
-            # now = datetime.now(pytz.timezone(timezone))
+            # now = datetime.datetime.now(pytz.timezone(timezone))
 
             # Current time in UTC
             now_utc = datetime.now(timezone('UTC'))
             # Convert to Asia/Manila time zone
             now = now_utc.astimezone(timezone('Asia/Manila'))
-
             for rec in self:
                 rec.datetime_now = now.strftime("%m/%d/%Y %I:%M %p")
                 _logger.debug(f'SMS::rec.datetime_now {rec.datetime_now}')

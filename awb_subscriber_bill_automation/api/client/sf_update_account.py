@@ -21,7 +21,7 @@ class SalesForceConnector(models.Model):
         now_utc = datetime.now(timezone('UTC'))
         # Convert to Asia/Manila time zone
         now = now_utc.astimezone(timezone('Asia/Manila'))
-        
+
         if record:
             self.data = {}
             if update_type == 1:
