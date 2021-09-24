@@ -11,14 +11,14 @@ class AradialAPIGatewayUpdateUser(object):
     def __init__(
         self,
         url,
-        userbalance_url,
+        balance_url,
         username,
         password,
         data
     ):
 
         self.url = url
-        self.userbalance_url = userbalance_url
+        self.balance_url = balance_url
         self.username = username
         self.password = password
 
@@ -55,7 +55,7 @@ class AradialAPIGatewayUpdateUser(object):
         update_state = True
         try:
             res = requests.post(
-                url=self.userbalance_url+'/'+self.data.UserID,
+                url=self.balance_url+'/'+self.data.UserID,
                 headers=self.headers,
                 data=json.dumps(self.data),
                 auth=HTTPBasicAuth(self.username, self.password)
