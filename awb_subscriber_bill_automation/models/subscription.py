@@ -92,6 +92,7 @@ class SaleSubscription(models.Model):
         if sms_flag and self.record.plan_type == 'Prepaid':
             sf_update_type = 6
             last_subscription = self._get_last_subscription(self.record)
+            last_subs_main_plan = self._get_mainplan(last_subscription)        
 
             # CTP flow for prepaid, 
             if last_subscription:
@@ -108,10 +109,10 @@ class SaleSubscription(models.Model):
                 except:
                     _logger.error(f'SMS:: !!! Failed Temporary Discon - Subscription code {self.record.code}')
 
-            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, ctp)
+            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, last_subs_main_plan, ctp)
 
             # Helper to update Odoo Opportunity
-            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
