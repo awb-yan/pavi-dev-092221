@@ -128,13 +128,31 @@ class SubscriptionCreate(models.Model):
 
         else:   # CTP
             _logger.info(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
-    
+
+            # for Residential
+            first_name = record.partner_id.first_name
+            last_name = record.partner_id.last_name
+
+            # for Corporate
+            if not first_name: 
+                first_name = record.partner_id.name
+                last_name = ''
+
+            self.data = {
+                'UserID': record.opportunity_id.jo_sms_id_username,
+                'Offer': main_plan.default_code.upper(),
+                'Status': '0',
+                'CustomInfo1': record.code,
+                'CustomInfo2': record.subscriber_location_id.name,
+                'CustomInfo3': record.customer_number,
+                'FirstName': first_name,
+                'LastName': last_name,
+            }
+
+            _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
+
             if last_subs_main_plan.default_code.upper() == main_plan.default_code.upper():
                 _logger.info('SMS:: CTP: Same Product')
-                _logger.info(main_plan.default_code.upper())
-                self.data = {
-                    'TimeBank' : self._getTimebank(main_plan.default_code.upper()),
-                }
                 _logger.info(f'SMS:: Updating aradial user\'s Timebank = {self.data}')
 
                 try:
@@ -149,28 +167,6 @@ class SubscriptionCreate(models.Model):
 
             else:
                 _logger.info('SMS:: CTP: Different Product')
-
-                # for Residential
-                first_name = record.partner_id.first_name
-                last_name = record.partner_id.last_name
-
-                # for Corporate
-                if not first_name: 
-                    first_name = record.partner_id.name
-                    last_name = ''
-
-                self.data = {
-                    'UserID': record.opportunity_id.jo_sms_id_username,
-                    'Offer': main_plan.default_code.upper(),
-                    'Status': '0',
-                    'CustomInfo1': record.code,
-                    'CustomInfo2': record.subscriber_location_id.name,
-                    'CustomInfo3': record.customer_number,
-                    'FirstName': first_name,
-                    'LastName': last_name,
-                }
-
-                _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
 
                 try:
                     if not self.env['aradial.connector'].update_user(self.data, 1):
