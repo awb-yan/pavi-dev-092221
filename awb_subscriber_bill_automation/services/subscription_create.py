@@ -177,7 +177,7 @@ class SubscriptionCreate(models.Model):
                         raise Exception
                 except:
                     if max_retries > 1:
-                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, ctp)
+                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, plan_type, ctp)
                     else:
                         _logger.error(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
                         raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
