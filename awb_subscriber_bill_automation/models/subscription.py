@@ -143,7 +143,7 @@ class SaleSubscription(models.Model):
         _logger.info(f'SMS:: Customer Number: {customer_id}')
 
         last_subscription = False
-        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id)], order='id desc', limit=2)
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
