@@ -133,13 +133,12 @@ class SubscriptionCreate(models.Model):
                 _logger.info('SMS:: CTP: Same Product')
                 _logger.info(main_plan.default_code.upper())
                 self.data = {
-                    'UserID': record.opportunity_id.jo_sms_id_username,
                     'TimeBank' : self._getTimebank(main_plan.default_code.upper()),
                 }
                 _logger.info(f'SMS:: Updating aradial user\'s Timebank = {self.data}')
 
                 try:
-                    if not self.env['aradial.connector'].update_user(self.data, 1):
+                    if not self.env['aradial.connector'].update_user(self.data, record.opportunity_id.jo_sms_id_username, 2):
                         raise Exception
                 except:
                     if max_retries > 1:
@@ -174,7 +173,7 @@ class SubscriptionCreate(models.Model):
                 _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
 
                 try:
-                    if not self.env['aradial.connector'].update_user(self.data, 2):
+                    if not self.env['aradial.connector'].update_user(self.data, 1):
                         raise Exception
                 except:
                     if max_retries > 1:

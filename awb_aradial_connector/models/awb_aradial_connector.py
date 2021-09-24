@@ -65,6 +65,7 @@ class AWBAradialConnector(models.Model):
     def update_user(
         self, 
         data,
+        UserID,
         update_code
     ):
         _logger.info("Update User")
@@ -85,7 +86,7 @@ class AWBAradialConnector(models.Model):
         if update_code == 1:
             updated_user = user.update_user()
         elif update_code == 2:
-            updated_user = user.update_timebank()
+            updated_user = user.update_timebank(UserID)
         
         return updated_user        
 
