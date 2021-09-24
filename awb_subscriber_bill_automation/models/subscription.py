@@ -109,7 +109,8 @@ class SaleSubscription(models.Model):
                 except:
                     _logger.error(f'SMS:: !!! Failed Temporary Discon - Subscription code {self.record.code}')
 
-            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, last_subs_main_plan, ctp)
+            _logger.info(f'Main Plan of the Last Subscription: {last_subs_main_plan}')
+            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, plan_type, last_subs_main_plan, ctp)
 
             # Helper to update Odoo Opportunity
             # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
