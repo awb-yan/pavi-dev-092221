@@ -86,6 +86,7 @@ class AWBAradialConnector(models.Model):
         if update_code == 1:
             updated_user = user.update_user()
         elif update_code == 2:
+            updated_user = user.update_user()
             updated_user = user.update_timebank(UserID)
         
         return updated_user        
