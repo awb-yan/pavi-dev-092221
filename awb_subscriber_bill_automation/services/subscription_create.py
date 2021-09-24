@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
-    def provision_and_activation(self, record, main_plan, last_subscription, plan_type, ctp):
+    def provision_and_activation(self, record, main_plan, last_subscription, plan_type, last_subs_main_plan, ctp):
         _logger.info('SMS:: function: provision_and_activation')
 
         max_retries = 3
@@ -38,7 +38,7 @@ class SubscriptionCreate(models.Model):
 
         # Facility Type routing
         if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, last_subscription, ctp)
+            self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, ctp)
 
         self._start_subscription(record, max_retries, ctp)
 
@@ -121,7 +121,7 @@ class SubscriptionCreate(models.Model):
 
             except:
                 if max_retries > 1:
-                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, ctp)
+                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, ctp)
                 else:
                     _logger.error(f'SMS:: !!! Add to Failed transaction log - Subscription code {record.code}')
                     raise Exception(f'SMS:: !!! Error Creating user in Aradial for {record.code}')
@@ -142,7 +142,7 @@ class SubscriptionCreate(models.Model):
                         raise Exception
                 except:
                     if max_retries > 1:
-                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, ctp)
+                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, ctp)
                     else:
                         _logger.error(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
                         raise Exception(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
@@ -177,7 +177,7 @@ class SubscriptionCreate(models.Model):
                         raise Exception
                 except:
                     if max_retries > 1:
-                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, ctp)
+                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, ctp)
                     else:
                         _logger.error(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
                         raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
