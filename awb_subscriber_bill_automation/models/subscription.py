@@ -56,7 +56,7 @@ class SaleSubscription(models.Model):
             plan_type_id = []
             for lines in rec.recurring_invoice_line_ids:
                 if lines.product_id.product_tmpl_id.product_segmentation == 'month_service':
-                    plan_type_id = lines.product_id.product_tmpl_id.sf_plan_type
+                    plan_type_id = lines.product_id.product_tmpl_id.sf_plan_type.name
                     # plan_type_result = self.env['product.plan.type'].search([('id','=',plan_type_id)])
 
             rec.plan_type = plan_type_id
