@@ -109,7 +109,7 @@ class SubscriptionCreate(models.Model):
                     'FirstName': first_name,
                     'LastName': last_name,
                     'ServiceType': 'Internet',
-                    'PrepaidIndicator': 1 if record.plan_type == 'Prepaid' else 0,
+                    'PrepaidIndicator': 1 if record.plan_type.name == 'Prepaid' else 0,
                 }
 
                 _logger.debug(f'SMS:: Creating User with data: {self.data}')
