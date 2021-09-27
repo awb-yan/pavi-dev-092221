@@ -238,7 +238,7 @@ class SubscriptionCreate(models.Model):
 
         _logger.info(f'YANYAN: Additional days = {days}')
 
-        return days * 86400
+        return int(days) * 86400
 
         # if offer == 'PREPAIDFBR5DAYS':
         #     return 5 * 86400
