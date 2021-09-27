@@ -112,7 +112,7 @@ class SaleSubscription(models.Model):
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, last_subs_main_plan, ctp)
 
             # Helper to update Odoo Opportunity
-            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
@@ -144,7 +144,7 @@ class SaleSubscription(models.Model):
         _logger.debug(f'SMS:: Customer Number: {customer_id}')
 
         last_subscription = False
-        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id)], order='id desc', limit=2)
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
