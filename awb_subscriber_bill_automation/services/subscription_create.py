@@ -233,13 +233,20 @@ class SubscriptionCreate(models.Model):
 
     def _getTimebank(self, offer):
 
-        if offer == 'PREPAIDFBR5DAYS':
-            return 5 * 86400
-        elif offer == 'PREPAIDFBR10DAYS':
-            return 10 * 86400
-        elif offer == 'PREPAIDFBR15DAYS':
-            return 15 * 86400
-        elif offer == 'PREPAIDFBR30DAYS':
-            return 30 * 86400
+        params = self.env['ir.config_parameter'].sudo()
+        days = params.get_param(offer)
+
+        _logger.info(f'YANYAN: Additional days = {days}')
+
+        return days * 86400
+
+        # if offer == 'PREPAIDFBR5DAYS':
+        #     return 5 * 86400
+        # elif offer == 'PREPAIDFBR10DAYS':
+        #     return 10 * 86400
+        # elif offer == 'PREPAIDFBR15DAYS':
+        #     return 15 * 86400
+        # elif offer == 'PREPAIDFBR30DAYS':
+        #     return 30 * 86400
         
-        return 0
+        # return 0
