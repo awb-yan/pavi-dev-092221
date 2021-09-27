@@ -231,22 +231,10 @@ class SubscriptionCreate(models.Model):
                 _logger.error(f'SMS:: !!! Error encountered while generating atm reference for subscription {self.record.code}..')
                 raise Exception(f'SMS:: !!! Error encountered while generating atm reference for subscription {self.record.code}..')
 
+
     def _getTimebank(self, offer):
 
         params = self.env['ir.config_parameter'].sudo()
         days = params.get_param(offer)
 
-        _logger.info(f'YANYAN: Additional days = {days}')
-
         return int(days) * 86400
-
-        # if offer == 'PREPAIDFBR5DAYS':
-        #     return 5 * 86400
-        # elif offer == 'PREPAIDFBR10DAYS':
-        #     return 10 * 86400
-        # elif offer == 'PREPAIDFBR15DAYS':
-        #     return 15 * 86400
-        # elif offer == 'PREPAIDFBR30DAYS':
-        #     return 30 * 86400
-        
-        # return 0
