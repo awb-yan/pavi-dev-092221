@@ -79,7 +79,7 @@ class SaleSubscription(models.Model):
 
         try:
             main_plan = self._get_mainplan(self.record)        
-            _logger.info(f'SMS::Main_Plan: {main_plan}')
+            _logger.debug(f'SMS::Main_Plan: {main_plan}')
 
             plan_type = main_plan.sf_plan_type.name
             if plan_type == 'Postpaid':
@@ -109,11 +109,10 @@ class SaleSubscription(models.Model):
                 except:
                     _logger.error(f'SMS:: !!! Failed Temporary Discon - Subscription code {self.record.code}')
 
-            _logger.info(f'Main Plan of the Last Subscription: {last_subs_main_plan}')
-            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, plan_type, last_subs_main_plan, ctp)
+            self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, last_subs_main_plan, ctp)
 
             # Helper to update Odoo Opportunity
-            # self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
+            self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
@@ -140,22 +139,22 @@ class SaleSubscription(models.Model):
         _logger.info('SMS:: function: _get_last_subscription')
         customer_id = record.customer_number
 
-        _logger.info(f'SMS:: Subscription Code: {record.code}')
+        _logger.debug(f'SMS:: Subscription Code: {record.code}')
         
-        _logger.info(f'SMS:: Customer Number: {customer_id}')
+        _logger.debug(f'SMS:: Customer Number: {customer_id}')
 
         last_subscription = False
-        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id)], order='id desc', limit=2)
+        subscriptions = self.env['sale.subscription'].search([('customer_number','=', customer_id),('plan_type','=', plan_type)], order='id desc', limit=2)
         
         if len(subscriptions) == 2:
             last_subscription = subscriptions[1]
-            _logger.info(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
+            _logger.debug(f'SMS::_get_last_subscription subscription[0]: {subscriptions[0].code}, subscription[1]: {subscriptions[1].code}')
 
         return last_subscription
 
 
     def _update_account(self, main_plan, rec, sf_update_type, max_retries):
-        _logger.info(f'SMS:: _update_account')
+        _logger.debug(f'SMS:: _update_account')
         try:
             self.env['sale.subscription'].update_account(rec, sf_update_type, main_plan)
         except:
@@ -174,7 +173,7 @@ class SaleSubscription(models.Model):
         
         self.env.cr.commit()
 
-        _logger.info(f'SMS:: New Subscription: {self.record}')
+        _logger.debug(f'SMS:: New Subscription: {self.record}')
         return self.record
 
 
@@ -190,7 +189,7 @@ class SaleSubscription(models.Model):
 
     @api.depends("atm_ref_sequence")
     def _compute_atm_reference_number(self):
-        _logger.info(f'SMS:: _compute_atm_reference_number')
+        _logger.debug(f'SMS:: _compute_atm_reference_number')
         for rec in self:
             rec.atm_ref = ''
             if rec.atm_ref_sequence:
@@ -201,7 +200,7 @@ class SaleSubscription(models.Model):
                     company_code = company_code[0]
                     sequence = rec.atm_ref_sequence
                     to_compute = company_code.name + sequence
-                    _logger.info(f"to_compute {to_compute}")
+                    _logger.debug(f"to_compute {to_compute}")
 
                     computables = str(to_compute)[2:9]
                     num_list = [8,7,6,5,4,3,2]
@@ -223,7 +222,7 @@ class SaleSubscription(models.Model):
                     else:
                         remainder = 11 - int(remainder)
 
-                    _logger.info(f"remainder {remainder}")
+                    _logger.debug(f"remainder {remainder}")
                     remainder = str(remainder)[0]
                     value = f'{to_compute}{remainder}1231'
                     rec.atm_ref = value
@@ -269,7 +268,7 @@ class SaleSubscription(models.Model):
         subs_date_start = self.date_start
 
         if line.product_id.id not in (device_id, ext_id):
-            _logger.info(f'Check Proration {date_start} {date_stop} x {line.date_start} {line.date_end}')
+            _logger.debug(f'Check Proration {date_start} {date_stop} x {line.date_start} {line.date_end}')
             date_end = date_stop
             diff = None
             # if line ends earlier
@@ -297,7 +296,7 @@ class SaleSubscription(models.Model):
                 # new_amount = rate * days
                 res['quantity'] = round(count,2)
                 res['name'] += f' ({days} days)'
-            _logger.info(f'Prorate: {diff} = {count} {line} {fiscal_position} {date_start} {date_stop}')
+            _logger.debug(f'Prorate: {diff} = {count} {line} {fiscal_position} {date_start} {date_stop}')
         # if self.subscription_status == 'new' and diff.days < 31:
         return res
 
@@ -321,12 +320,12 @@ class SaleSubscription(models.Model):
         else:
             next_date = next_date - relativedelta(**{interval_type: interval*2})
 
-        _logger.info(f'Compute next date: Next {next_date}, due_day: {cutoff_day}')
+        _logger.debug(f'Compute next date: Next {next_date}, due_day: {cutoff_day}')
         recurring_start_date = self._get_recurring_next_date(self.recurring_rule_type, interval, next_date, cutoff_day)
         revenue_date_start = fields.Date.from_string(recurring_start_date+relativedelta(days=1))
-        _logger.info('Dates: Next Date: {next_date} Start Day: {revenue_date_start}')
+        _logger.debug('Dates: Next Date: {next_date} Start Day: {revenue_date_start}')
         recurring_next_date = self._get_recurring_next_date(self.recurring_rule_type, 0, revenue_date_start, cutoff_day)
-        _logger.info(f'Days: {recurring_start_date >= recurring_next_date}: {recurring_start_date} > {recurring_next_date}')
+        _logger.debug(f'Days: {recurring_start_date >= recurring_next_date}: {recurring_start_date} > {recurring_next_date}')
         # This is a HACK to fix the issue with jumping dates
         if recurring_start_date >= recurring_next_date:
             recurring_next_date = self._get_recurring_next_date(self.recurring_rule_type, interval, revenue_date_start, cutoff_day)
@@ -336,8 +335,8 @@ class SaleSubscription(models.Model):
         for line in self.recurring_invoice_line_ids:
             starts_within = not line.date_start or (line.date_start and line.date_start < revenue_date_stop)
             ends_within = not line.date_end or (line.date_end and line.date_end > revenue_date_start)
-            _logger.info(f'Check Invoice line dates: {starts_within} {line.date_start} {revenue_date_stop}')
-            _logger.info(f'Check Invoice line dates: {ends_within} {line.date_end} {revenue_date_start}')
+            _logger.debug(f'Check Invoice line dates: {starts_within} {line.date_start} {revenue_date_stop}')
+            _logger.debug(f'Check Invoice line dates: {ends_within} {line.date_end} {revenue_date_start}')
             if starts_within and ends_within:
                 val = self._prepare_invoice_line(
                     line, fiscal_position, revenue_date_start, revenue_date_stop)
@@ -351,9 +350,9 @@ class SaleSubscription(models.Model):
         # invoice Lines
         for invoice_line in invoice['invoice_line_ids']:
             line = invoice_line[2]
-            _logger.info(f'Line: {line}')
+            _logger.debug(f'Line: {line}')
             product = self.env['product.product'].browse(line['product_id'])
-            _logger.info(f'Prod ID temp {product.product_tmpl_id.id}')
+            _logger.debug(f'Prod ID temp {product.product_tmpl_id.id}')
 
             total_vat = 0.0
             for taxes in line['tax_ids']:
@@ -373,7 +372,7 @@ class SaleSubscription(models.Model):
                 total_vat += tot_vat
 
             if product.product_tmpl_id.id != device_id:
-                _logger.info(f'Invoice: {invoice}')
+                _logger.debug(f'Invoice: {invoice}')
 
                 args = [('partner_id', '=', invoice['partner_id']),
                         ('type', '=', 'out_refund'),
@@ -458,8 +457,8 @@ class SaleSubscription(models.Model):
         order.message_post(body=(_("This renewal order has been created from the subscription ") +
                                  " <a href=# data-oe-model=sale.subscription data-oe-id=%d>%s</a>" % (self.id, self.display_name)))
         order.order_line._compute_tax_id()
-        _logger.info(f'Order pro {order}')
-        _logger.info(f'Order product_lines {product_lines}')
+        _logger.debug(f'Order pro {order}')
+        _logger.debug(f'Order product_lines {product_lines}')
         order.action_confirm_renewal()
 
     def wipe(self):
@@ -489,9 +488,9 @@ class SaleSubscription(models.Model):
         for rec in self:
             for line_item in rec.recurring_invoice_line_ids:
                 if line_item.product_id.product_segmentation == 'month_service':
-                    _logger.info("MSF")
-                    _logger.info(f'Name: {line_item.product_id.name}')
-                    _logger.info(f'Description: {line_item.product_id.description}')
+                    _logger.debug("MSF")
+                    _logger.debug(f'Name: {line_item.product_id.name}')
+                    _logger.debug(f'Description: {line_item.product_id.description}')
                     products.append(line_item.product_id.name)
                     desc.append(line_item.product_id.description)
                 
@@ -514,7 +513,7 @@ class SaleSubscription(models.Model):
             now = now_utc.astimezone(timezone('Asia/Manila'))
             for rec in self:
                 rec.datetime_now = now.strftime("%m/%d/%Y %I:%M %p")
-                _logger.info(f'SMS::rec.datetime_now {rec.datetime_now}')
+                _logger.debug(f'SMS::rec.datetime_now {rec.datetime_now}')
         except:
             _logger.error(f'SMS:: Error encountered in getting date and time..') 
             rec.datetime_now = datetime.now().strftime("%m/%d/%Y %I:%M %p")

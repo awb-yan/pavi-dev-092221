@@ -18,17 +18,18 @@ _logger = logging.getLogger(__name__)
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
-    def provision_and_activation(self, record, main_plan, last_subscription, plan_type, last_subs_main_plan, ctp):
+    def provision_and_activation(self, record, main_plan, last_subscription, last_subs_main_plan, ctp):
         _logger.info('SMS:: function: provision_and_activation')
 
         max_retries = 3
         self.record = record
 
         self._set_to_draft(record)
+        plan_type = main_plan.sf_plan_type.name
         aradial_flag = main_plan.sf_facility_type.is_aradial_product
         
-        _logger.info(f'SMS:: Plan Type: {self.record.plan_type.name}')
-        _logger.info(f'SMS:: Aradial Flag: {aradial_flag}')
+        _logger.debug(f'SMS:: Plan Type: {plan_type}')
+        _logger.debug(f'SMS:: Aradial Flag: {aradial_flag}')
 
         # Plan Type Flow routing
         if plan_type == 'Postpaid':
@@ -55,10 +56,10 @@ class SubscriptionCreate(models.Model):
     # TODO: update Postpaid provisioning
     def _provision_postpaid(self, record, ctp):
         if not ctp:
-            _logger.info('SMS:: first')
+            _logger.debug('SMS:: first')
             # Welcome Provisioning Notification
         else:
-            _logger.info('SMS:: last')
+            _logger.debug('SMS:: last')
             # Returning Subscriber Notification
 
         return 0
@@ -67,7 +68,7 @@ class SubscriptionCreate(models.Model):
         _logger.info('SMS:: function: provision_prepaid')
         
         if not ctp:
-            _logger.info('SMS:: First subscription')
+            _logger.debug('SMS:: First subscription')
             try:
                 _logger.info(' === Sending SMS Welcome Notification ===')
                 # Welcome Provisioning Notification
@@ -76,18 +77,18 @@ class SubscriptionCreate(models.Model):
                     template_name="Subscription Welcome Notification",
                     state="Draft"
                 )
-                _logger.info('SMS:: Completed Sending Welcome SMS')
+                _logger.debug('SMS:: Completed Sending Welcome SMS')
             except:
                 _logger.warning('SMS:: !!! Error sending Welcome Notification')
         else:
-            _logger.info('SMS:: Reloading...')
+            _logger.debug('SMS:: Reloading...')
 
 
     def _send_to_aradial(self, record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp):
-        _logger.info('SMS:: function: send_to_aradial')
+        _logger.debug('SMS:: function: send_to_aradial')
         # New Subscription
         if not ctp:
-            _logger.info('SMS:: CTP: New Subscriber')
+            _logger.debug('SMS:: CTP: New Subscriber')
             try:
                 # for Residential
                 first_name = record.partner_id.first_name
@@ -112,12 +113,12 @@ class SubscriptionCreate(models.Model):
                     'PrepaidIndicator': 1 if plan_type == 'Prepaid' else 0,
                 }
 
-                _logger.info(f'SMS:: Creating User with data: {self.data}')
+                _logger.debug(f'SMS:: Creating User with data: {self.data}')
 
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
 
-                _logger.info('SMS:: Successfully created user in Aradial')
+                _logger.debug('SMS:: Successfully created user in Aradial')
 
             except:
                 if max_retries > 1:
@@ -127,7 +128,7 @@ class SubscriptionCreate(models.Model):
                     raise Exception(f'SMS:: !!! Error Creating user in Aradial for {record.code}')
 
         else:   # CTP
-            _logger.info(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
+            _logger.debug(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
 
             # for Residential
             first_name = record.partner_id.first_name
@@ -150,34 +151,23 @@ class SubscriptionCreate(models.Model):
                 'LastName': last_name,
             }
 
-            _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
+            _logger.debug(f'SMS:: Updating aradial user with data= {self.data}')
 
-            if last_subs_main_plan.default_code.upper() == main_plan.default_code.upper():
-                _logger.info('SMS:: CTP: Same Product')
-                _logger.info(f'SMS:: Updating aradial user\'s Timebank = {self.data}')
-
-                try:
-                    if not self.env['aradial.connector'].update_user(self.data, 2, record.opportunity_id.jo_sms_id_username):
-                        raise Exception
-                except:
-                    if max_retries > 1:
-                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, plan_type, ctp)
-                    else:
-                        _logger.error(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
-                        raise Exception(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
-
-            else:
-                _logger.info('SMS:: CTP: Different Product')
-
-                try:
+            try:
+                if last_subs_main_plan.default_code.upper() != main_plan.default_code.upper():
+                    _logger.debug('SMS:: CTP: Different Product')
                     if not self.env['aradial.connector'].update_user(self.data, 1):
                         raise Exception
-                except:
-                    if max_retries > 1:
-                        self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, plan_type, ctp)
-                    else:
-                        _logger.error(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
-                        raise Exception(f'SMS:: !!! Error encountered while updating aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+                else:
+                    _logger.debug('SMS:: CTP: Same Product')
+                    if not self.env['aradial.connector'].update_user(self.data, 2, record.opportunity_id.jo_sms_id_username):
+                        raise Exception
+            except:
+                if max_retries > 1:
+                    self._send_to_aradial(record, main_plan, max_retries-1, last_subscription, last_subs_main_plan, plan_type, ctp)
+                else:
+                    _logger.error(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
+                    raise Exception(f'SMS:: !!! Error encountered while updating the Timebank of aradial user for Subscription: {record.code} and SMS UserID: {record.opportunity_id.jo_sms_id_username}')
 
 
     def _start_subscription(self, record, max_retries, ctp):
@@ -205,7 +195,7 @@ class SubscriptionCreate(models.Model):
                     template_name=smstemplate,
                     state="In Progress"
                 )
-                _logger.info(f'SMS:: Completed Sending {smstemplate}')
+                _logger.debug(f'SMS:: Completed Sending {smstemplate}')
             except:
                 _logger.warning(f'SMS:: !!! Error sending {smstemplate}')
 
