@@ -13,9 +13,6 @@ class SalesForceConnector(models.Model):
 
     def update_account(self, record=None, update_type=None, main_plan=None):
         _logger.info('function: SalesForceConnector => update_account')
-
-        # timezone = self.env.user.tz or pytz.utc
-        # now = datetime.datetime.now(pytz.timezone(timezone))
         
         # Current time in UTC
         now_utc = datetime.now(timezone('UTC'))
@@ -45,7 +42,6 @@ class SalesForceConnector(models.Model):
                     'SFID': record.opportunity_id.salesforce_id,
                     'BillCustomerID': record.customer_number,
                     'SMS_Activation_Date_Time': now.strftime("%m/%d/%Y %I:%M%p"),
-                    # 'SMS_Activation_Date_Time': datetime.now().strftime("%m/%d/%Y %I:%M%p"),
                     'SubscriptionCode': record.code,
                     'AccountStatus': "Active",
                     'ProductCode': main_plan.default_code.upper(),

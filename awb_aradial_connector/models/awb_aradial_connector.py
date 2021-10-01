@@ -40,11 +40,11 @@ class AWBAradialConnector(models.Model):
         else:
             return False
 
-    def get_remaining_time(
+    def get_user(
         self, 
         sms_id_username
     ):
-        _logger.info("Get Remaining Time")
+        _logger.info("Get User's Profile")
         
         params = self.env['ir.config_parameter'].sudo()
         self.aradial_url = params.get_param('aradial_url')
@@ -56,11 +56,9 @@ class AWBAradialConnector(models.Model):
             username=self.aradial_username,
             password=self.aradial_password
         )
-        timebank = user.get_user(sms_id_username)
+        user_data = user.get_user(sms_id_username)
 
-        # _logger.info("User Creation: %s" % created_user)
-
-        return timebank        
+        return user_data        
 
     def update_user(
         self, 
@@ -83,10 +81,9 @@ class AWBAradialConnector(models.Model):
             password=self.aradial_password,
             data=data
         )
-        if update_code == 1:
-            updated_user = user.update_user()
-        elif update_code == 2:
-            updated_user = user.update_user()
+        updated_user = user.update_user()
+
+        if update_code == 2:
             updated_user = user.update_timebank(UserID)
         
         return updated_user        

@@ -21,7 +21,7 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.5.7',
+    'version': '13.0.1.5.8',
 
     'depends': ['crm', 'sale_management', 'sale_subscription', 'awb_subscriber_product_information', 'awb_product_segmentation'],
 

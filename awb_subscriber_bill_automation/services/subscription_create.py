@@ -85,7 +85,7 @@ class SubscriptionCreate(models.Model):
 
 
     def _send_to_aradial(self, record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp):
-        _logger.debug('SMS:: function: send_to_aradial')
+        _logger.info('SMS:: function: send_to_aradial')
         # New Subscription
         if not ctp:
             _logger.debug('SMS:: CTP: New Subscriber')
@@ -113,12 +113,12 @@ class SubscriptionCreate(models.Model):
                     'PrepaidIndicator': 1 if plan_type == 'Prepaid' else 0,
                 }
 
-                _logger.debug(f'SMS:: Creating User with data: {self.data}')
+                _logger.info(f'SMS:: Creating User with data: {self.data}')
 
                 if not self.env['aradial.connector'].create_user(self.data):
                     raise Exception
 
-                _logger.debug('SMS:: Successfully created user in Aradial')
+                _logger.info('SMS:: Successfully created user in Aradial')
 
             except:
                 if max_retries > 1:
@@ -128,7 +128,7 @@ class SubscriptionCreate(models.Model):
                     raise Exception(f'SMS:: !!! Error Creating user in Aradial for {record.code}')
 
         else:   # CTP
-            _logger.debug(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
+            _logger.info(f'SMS:: Processing reloading for Customer: {record.code}, New Subscription: {record.code} and New Offer: {main_plan.default_code.upper()}')
 
             # for Residential
             first_name = record.partner_id.first_name
@@ -151,7 +151,7 @@ class SubscriptionCreate(models.Model):
                 'LastName': last_name,
             }
 
-            _logger.debug(f'SMS:: Updating aradial user with data= {self.data}')
+            _logger.info(f'SMS:: Updating aradial user with data= {self.data}')
 
             try:
                 if last_subs_main_plan.default_code.upper() != main_plan.default_code.upper():

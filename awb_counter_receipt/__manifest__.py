@@ -21,7 +21,7 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.3.0',
+    'version': '13.0.1.1.0',
 
     'depends': ['base', 'purchase', 'purchase_stock', 'stock', 'account'],
 

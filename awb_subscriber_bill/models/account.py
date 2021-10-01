@@ -56,15 +56,6 @@ class AccountMove(models.Model):
             prev_balance = sum(rec.statement_line_ids.filtered(lambda r: r.statement_type == 'prev_bill').mapped('amount'))
             prev_received = sum(rec.statement_line_ids.filtered(lambda r: r.statement_type == 'payment').mapped('amount'))
             adjustment = sum(rec.statement_line_ids.filtered(lambda r: r.statement_type == 'adjust').mapped('amount'))
-
-            _logger.info(f' YANYAN: prev_balance: {prev_balance}')
-            _logger.info(f' YANYAN: prev_received: {prev_received}')
-            _logger.info(f' YANYAN: adjustment: {adjustment}')
-
-            prev_balance = 0 if prev_balance is None else prev_balance
-            prev_received = 0 if prev_received is None else prev_received
-            adjustment = 0 if adjustment is None else adjustment
-
             rec.total_prev_charges = prev_balance + prev_received + adjustment
 
     @api.model

@@ -1,11 +1,3 @@
-## [13.0.1.3.0] - 2021-09-14
-
-- [FIX] Included required in SI Number attributes
-
-## [13.0.1.2.0] - 2021-04-22
-
-- [IMP] Additional fields should be visible only when the picking type is Receipt
-
 # [1.1.0]
 
 - [IMP] Remove CR Details until the item is not received

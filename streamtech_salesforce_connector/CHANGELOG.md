@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [13.0.1.2.6] - 2021-09-29
+   - [ADD] SF Update Type: 1 Update Billing Customer ID. API Integration: Odoo to SF Update of Billing Customer ID upon create of Accounts in Odoo
+## [13.0.1.2.5] - 2021-09-27
+   - [IMP] Added handling to be able to accept 0 as a value in the contract term from SalesForce
+
 ## [13.0.1.2.4] - 2021-09-22
    - [ADD] Added new field to pull from SF import of Products (Days_Duration__c) 
    - [ADD] Auto creation of Subscription Template for Prepaid plan type

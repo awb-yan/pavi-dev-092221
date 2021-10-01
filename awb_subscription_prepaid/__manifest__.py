@@ -5,14 +5,14 @@
 #
 ##############################################################################
 {
-    'name': "AWB Purchase Requisition",
+    'name': "AWB Prepaid Subscription",
 
     'summary': """
-        Purchase Requisition
+        Prepaid Subscription
         """,
 
     'description': """
-        Extension Odoo Apps
+        Prepaid Subscription
     """,
 
     'author': "Achieve Without Borders",
@@ -21,18 +21,18 @@
 
     'category': 'Localization',
 
-    'version': '13.0.1.4.1',
+    'version': '13.0.1.0.1',
 
-    'depends': ['requisition_approval', 'purchase_requisition', 'purchase', 'stock', 'purchase_stock'],
+    'depends': ['sale_subscription', 'awb_product_segmentation' ,'awb_subscriber_bill_automation'],
 
     'data': [
-        'security/ir.model.access.csv',
-        'views/approval_category_views.xml',
-        'views/approval_request_views.xml',
-        'views/purchase_order_views.xml',
-        'views/purchase_requisition_views.xml',
+        'views/subscription_form_view.xml',
+        'views/customer_portal_view.xml',
+        'views/website_salecart_lines_view.xml',
     ],
+    
     'installable': True,
     'application': False,
     'auto_install': False
+
 }
