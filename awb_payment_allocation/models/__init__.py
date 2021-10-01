@@ -6,4 +6,4 @@
 ##############################################################################
 
 # from . import account
-from . import account_payment, payment_allocation
+from . import account_payment
