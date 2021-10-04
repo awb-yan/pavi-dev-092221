@@ -18,7 +18,7 @@
     'depends': ['account', 'account_asset'],
     'data': [
         'wizards/account_asset_sell_wiz.xml',
-        'views/account_view.xml',
+        # 'views/account_view.xml',
     ],
     'installable': True,
     'application': False,

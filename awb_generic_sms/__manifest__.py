@@ -36,7 +36,7 @@
         'views/send_sms_view.xml',
         'views/menuitem.xml',
         'views/res_config_settings.xml',
-        'views/sms_invoice_view.xml',
+        # 'views/sms_invoice_view.xml',
         'views/sms_payment_view.xml',
         'data/set_access_rights.xml',
         'data/account_move_data.xml',
