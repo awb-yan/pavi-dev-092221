@@ -20,7 +20,7 @@
         'data/account_move_rebate_sequence.xml',
         'security/ir.model.access.csv',
         'views/account_move_batch_views.xml',
-        'views/account_move_views.xml',
+        # 'views/account_move_views.xml',
     ],
     'installable': True,
     'application': False,
