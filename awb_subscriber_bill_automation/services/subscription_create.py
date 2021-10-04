@@ -143,7 +143,7 @@ class SubscriptionCreate(models.Model):
                 'UserID': record.opportunity_id.jo_sms_id_username,
                 'Offer': main_plan.default_code.upper(),
                 'Status': '0',
-                'TimeBank': self._getTimebank(main_plan.default_code.upper()),
+                'TimeBank': self._getTimebank(record),
                 'CustomInfo1': record.code,
                 'CustomInfo2': record.subscriber_location_id.name,
                 'CustomInfo3': record.customer_number,
@@ -232,9 +232,12 @@ class SubscriptionCreate(models.Model):
                 raise Exception(f'SMS:: !!! Error encountered while generating atm reference for subscription {self.record.code}..')
 
 
-    def _getTimebank(self, offer):
+    def _getTimebank(self, rec):
 
-        params = self.env['ir.config_parameter'].sudo()
-        days = params.get_param(offer)
+        # params = self.env['ir.config_parameter'].sudo()
+        # days = params.get_param(offer)
 
-        return int(days) * 86400
+        # return int(days) * 86400
+
+        seconds_per_day = 86400
+        return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
