@@ -33,6 +33,7 @@
         'views/crm_view.xml',
         'views/sale_view.xml',
         'views/subscription_view.xml',
+        'views/res_config_settings.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
