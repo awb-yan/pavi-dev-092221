@@ -8,20 +8,22 @@
             <xpath expr="//div[hasclass('settings')]/div[@data-key='sale_management']" position="inside">
                 <div id="physical disconnection">
                     <h2>Physical Disconnection</h2>
-                    <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting" groups="base.group_no_one">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="prepaid_phy_discon"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="prepaid_phy_discon"/>
-                                <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
-                                <div class="text-muted">
-                                    Set the number of days before the suspended account becomes disconnected
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting" groups="base.group_no_one">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="prepaid_phy_discon"/>
                                 </div>
-                                <div class="content-group"  attrs="{'invisible': [('prepaid_phy_discon','=',False)]}">
-                                    <div class="mt16">
-                                        <span class="col-lg-3">Default Limit: <field name="quotation_validity_days" attrs="{'required': [('use_quotation_validity_days', '=', True)]}"/> days</span>
+                                <div class="o_setting_right_pane">
+                                    <label for="prepaid_phy_discon"/>
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                                    <div class="text-muted">
+                                        Set the number of days before the suspended account becomes disconnected
+                                    </div>
+                                    <div class="content-group"  attrs="{'invisible': [('prepaid_phy_discon','=',False)]}">
+                                        <div class="mt16">
+                                            <span class="col-lg-3">Default Limit: <field name="quotation_validity_days" attrs="{'required': [('use_quotation_validity_days', '=', True)]}"/> days</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
