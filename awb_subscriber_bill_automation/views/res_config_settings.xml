@@ -3,7 +3,7 @@
     <record id="inherit_res_config_settings_view_form_sale" model="ir.ui.view">
         <field name="name">inherit.res.config.settings.view.form.sale</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="res.config.settings.res.config.settings.view.form.inherit.sale"/>
+        <field name="inherit_id" ref="res.config.settings.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('settings')]/div[@data-key='sale_management']/div[@id='sales_settings_invoicing_policy']" position="after">
                 <div id="physical disconnection">
