@@ -21,7 +21,7 @@
                                 </div>
                                 <div class="content-group"  attrs="{'invisible': [('prepaid_phy_discon','=',False)]}">
                                     <div class="mt16">
-                                        <span class="col-lg-3">System Disconnected After: <field name="discon_days" attrs="{'required': [('prepaid_phy_discon', '=', True)]}"/> days</span>
+                                        <span class="col-lg-3">System Disconnected After: <field name="prepaid_discon_days" attrs="{'required': [('prepaid_phy_discon', '=', True)]}"/> days</span>
                                     </div>
                                 </div>
                             </div>
@@ -38,7 +38,7 @@
                                 </div>
                                 <div class="content-group"  attrs="{'invisible': [('postpaid_phy_discon','=',False)]}">
                                     <div class="mt16">
-                                        <span class="col-lg-3">System Disconnected After: <field name="discon_days" attrs="{'required': [('postpaid_phy_discon', '=', True)]}"/> days</span>
+                                        <span class="col-lg-3">System Disconnected After: <field name="postpaid_discon_days" attrs="{'required': [('postpaid_phy_discon', '=', True)]}"/> days</span>
                                     </div>
                                 </div>
                             </div>

@@ -16,7 +16,8 @@ class SubscriberBillAutomationModel(models.TransientModel):
 
     prepaid_phy_discon = fields.Boolean(string="Prepaid Physical Discon Trigger", default=False)
     postpaid_phy_discon = fields.Boolean(string="Postpaid Physical Discon Trigger", default=False)
-    discon_days = fields.Integer(default=180)
+    prepaid_discon_days = fields.Integer(default=180)
+    postpaid_discon_days = fields.Integer(default=180)
 
     def get_log(self):
         self.ensure_one()
