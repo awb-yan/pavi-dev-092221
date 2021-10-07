@@ -44,10 +44,5 @@ class SubscriberBillAutomationModel(models.TransientModel):
         prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon')
         postpaid_days = IrConfigParameter.get_param('postpaid_physical_discon')
 
-        res.update(
-            prepaid_physical_discon1=prepaid_days,
-            postpaid_physical_discon1=postpaid_days
-        )
-
         return res
 
