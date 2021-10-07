@@ -32,8 +32,10 @@ class SubscriberBillAutomationModel(models.TransientModel):
     @api.model
     def set_values(self):
         res = super(SubscriberBillAutomationModel, self).set_values()
-        self.env['ir.config_parameter'].set_param('prepaid_physical_discon', self.prepaid_discon_days)
-        self.env['ir.config_parameter'].set_param('postpaid_physical_discon', self.postpaid_discon_days)
+        self.env['ir.config_parameter'].set_param('prepaid_physical_discon_cb', self.prepaid_phy_discon)
+        self.env['ir.config_parameter'].set_param('postpaid_physical_discon_cb', self.postpaid_phy_discon)
+        self.env['ir.config_parameter'].set_param('prepaid_physical_discon_days', self.prepaid_discon_days)
+        self.env['ir.config_parameter'].set_param('postpaid_physical_discon_days', self.postpaid_discon_days)
 
         return res
 
@@ -41,8 +43,15 @@ class SubscriberBillAutomationModel(models.TransientModel):
     def get_values(self):
         res = super(SubscriberBillAutomationModel, self).get_values()
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
-        prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon')
-        postpaid_days = IrConfigParameter.get_param('postpaid_physical_discon')
+        prepaid_cb = IrConfigParameter.get_param('prepaid_physical_discon_cb')
+        postpaid_cb = IrConfigParameter.get_param('postpaid_physical_discon_cb')
+        prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
+        postpaid_days = IrConfigParameter.get_param('postpaid_physical_discon_days')
 
+        res.update(
+            prepaid_phy_discon = True if prepaid_cb == 'True' else False,
+            postpaid_phy_discon = True if postpaid_cb == 'True' else False
+
+        )
         return res
 
