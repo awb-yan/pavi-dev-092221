@@ -20,8 +20,11 @@ _logger = logging.getLogger(__name__)
 class SubscriptionDisconnect(models.Model):
     _inherit = "sale.subscription"
 
-    def physical_discon(self):
+    def prepaid_physical_discon(self):
         _logger.info(f'Get all subs ending today - 6 months')
+
+        IrConfigParameter = self.env['ir.config_parameter'].sudo()
+        prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
         main_plan = None
         sf_update_type = 5
@@ -29,30 +32,31 @@ class SubscriptionDisconnect(models.Model):
         subscription_to_discon = []
 
         # 1. get date today - 6 months
-        date_to_discon = datetime.now() + relativedelta(months=-6)
-        # 2. get subs with end date equals to the result of #1
-        subs = self.env['sale.subscription'].search([('subscription_status', '=', 'disconnection'), 
-            ('subscription_status_subtype', '=', 'disconnection-temporary'), 
-            ('end_datetime', '>=', date_to_discon.strftime("%Y-%m-%d 00:00:00")), 
-            ('end_datetime', '<=', date_to_discon.strftime("%Y-%m-%d 11:59:59"))])
-        # 3. loop thru the list of subscriptions
-        for sub in subs:
-        #     3a. get latest subs based on customer id
-            customer_id = sub.customer_number
-            latest_subs = self.env['sale.subscription'].search([('customer_number', '=', customer_id)], order='id desc', limit = 1)
-        #     3b. if the one on the list is latest, issue physical discon
-            if sub.id == latest_subs.id:
-                subscription_to_discon += sub
+        date_to_discon = datetime.now() + relativedelta(days=-int(prepaid_days))
+        _logger.info(date_to_discon)
+        # # 2. get subs with end date equals to the result of #1
+        # subs = self.env['sale.subscription'].search([('subscription_status', '=', 'disconnection'), 
+        #     ('subscription_status_subtype', '=', 'disconnection-temporary'), 
+        #     ('end_datetime', '>=', date_to_discon.strftime("%Y-%m-%d 00:00:00")), 
+        #     ('end_datetime', '<=', date_to_discon.strftime("%Y-%m-%d 11:59:59"))])
+        # # 3. loop thru the list of subscriptions
+        # for sub in subs:
+        # #     3a. get latest subs based on customer id
+        #     customer_id = sub.customer_number
+        #     latest_subs = self.env['sale.subscription'].search([('customer_number', '=', customer_id)], order='id desc', limit = 1)
+        # #     3b. if the one on the list is latest, issue physical discon
+        #     if sub.id == latest_subs.id:
+        #         subscription_to_discon += sub
         
-        if len(subscription_to_discon) > 0:
-            for sub in subscription_to_discon:
-                self._change_status_subtype(sub,'disconnection-permanent')
-        #     3c. update SF
-                _logger.info(f'SMS:: Update Account in SF - Update Type {sf_update_type} on Subscription code {sub.code}')
-                # try:
-                #     self._update_account(main_plan, sub, sf_update_type, max_fail_retries)
-                # except:
-                #     _logger.error(f'SMS:: !!! Failed to Update Account in SF - Update Type {sf_update_type} on Subscription code {sub.code}')
+        # if len(subscription_to_discon) > 0:
+        #     for sub in subscription_to_discon:
+        #         self._change_status_subtype(sub,'disconnection-permanent')
+        # #     3c. update SF
+        #         _logger.info(f'SMS:: Update Account in SF - Update Type {sf_update_type} on Subscription code {sub.code}')
+        #         # try:
+        #         #     self._update_account(main_plan, sub, sf_update_type, max_fail_retries)
+        #         # except:
+        #         #     _logger.error(f'SMS:: !!! Failed to Update Account in SF - Update Type {sf_update_type} on Subscription code {sub.code}')
 
 
     def _get_discon_type(self, discon_type, channel):
