@@ -51,8 +51,8 @@ class SubscriberBillAutomationModel(models.TransientModel):
         res.update(
             prepaid_phy_discon = True if prepaid_cb == 'True' else False,
             postpaid_phy_discon = True if postpaid_cb == 'True' else False,
-            prepaid_discon_days = prepaid_days,
-            postpaid_discon_days = postpaid_days
+            prepaid_discon_days = int(prepaid_days),
+            postpaid_discon_days = int(postpaid_days)
         )
         return res
 
