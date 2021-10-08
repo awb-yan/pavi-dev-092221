@@ -18,25 +18,8 @@ _logger = logging.getLogger(__name__)
 class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
-    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
-    expiry_date = fields.Date(string="Last Expiry Date", default='_compute_last_expiry_date')
-
-    @api.depends('subscription_count')
-    def _compute_last_reload_date(self):
-        for rec in self:
-            if rec.plan_type.name == 'Prepaid':
-                rec.last_reload_date = datetime.now() + relativedelta(hours=8)
-            else:
-                rec.last_reload_date = None
-
-    @api.depends('subscription_count')
-    def _compute_last_expiry_date(self):
-        for rec in self:
-            if rec.plan_type.name == 'Prepaid':
-                rec.expiry_date = datetime.now() + relativedelta(hours=8)
-            else:
-                rec.expiry_date = None
-                
+    last_reload_date = fields.Date(string="Last Reload Date", default=fields.Date.today())
+    expiry_date = fields.Date(string="Last Expiry Date", default=fields.Date.today())
 
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
