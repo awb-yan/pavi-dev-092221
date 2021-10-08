@@ -27,7 +27,7 @@ class SubscriberRecord(models.Model):
             if rec.plan_type.name == 'Prepaid':
                 rec.last_reload_date = fields.Date.today()
             else:
-                rec.last_reload_date = None
+                rec.last_reload_date = False
 
     # @api.depends('subscription_count')
     # def _compute_last_expiry_date(self):
