@@ -25,7 +25,7 @@ class SubscriberRecord(models.Model):
     def _compute_last_reload_date(self):
         for rec in self:
             if rec.plan_type.name == 'Prepaid':
-                rec.last_reload_date = fields.Date.today()
+                rec.last_reload_date = datetime.now() + relativedelta(hours=8)
             else:
                 rec.last_reload_date = None
 
@@ -33,7 +33,7 @@ class SubscriberRecord(models.Model):
     def _compute_last_expiry_date(self):
         for rec in self:
             if rec.plan_type.name == 'Prepaid':
-                rec.expiry_date = fields.Date.today()
+                rec.expiry_date = datetime.now() + relativedelta(hours=8)
             else:
                 rec.expiry_date = None
                 
