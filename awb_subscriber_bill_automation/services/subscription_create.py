@@ -15,6 +15,29 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+class SubscriberRecord(models.Model):
+    _inherit = 'res.partner'
+
+    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
+    expiry_date = fields.Date(string="Last Expiry Date", default='_compute_last_expiry_date')
+
+    @api.depends('subscription_count')
+    def _compute_last_reload_date(self):
+        for rec in self:
+            if rec.plan_type.name == 'Prepaid':
+                rec.last_reload_date = fields.Date.today()
+            else:
+                rec.last_reload_date = None
+
+    @api.depends('subscription_count')
+    def _compute_last_expiry_date(self):
+        for rec in self:
+            if rec.plan_type.name == 'Prepaid':
+                rec.expiry_date = fields.Date.today()
+            else:
+                rec.expiry_date = None
+                
+
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
@@ -175,6 +198,11 @@ class SubscriptionCreate(models.Model):
         _logger.info('SMS:: function: start_subscription')
 
         try:
+            # YANYAN
+            # Get # of expiry days from sys param
+            # search for the contact record and update the expiry_date
+            # expiry_date = last reload_date + duration + expiry_days
+
             self.record = record
             now = datetime.now().strftime("%Y-%m-%d")
             self.record.write({
@@ -234,10 +262,6 @@ class SubscriptionCreate(models.Model):
 
     def _getTimebank(self, rec):
 
-        # params = self.env['ir.config_parameter'].sudo()
-        # days = params.get_param(offer)
-
-        # return int(days) * 86400
         _logger.info(f' recurring_rule_count: {rec.template_id.recurring_rule_count}')
         _logger.info(f' recurring_interval: {rec.template_id.recurring_interval}')
         seconds_per_day = 86400
