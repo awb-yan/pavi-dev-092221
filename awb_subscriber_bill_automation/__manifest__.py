@@ -34,7 +34,7 @@
         'views/sale_view.xml',
         'views/subscription_view.xml',
         'views/res_config_settings.xml',
-        'views/partner_view.xml'
+        # 'views/partner_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
