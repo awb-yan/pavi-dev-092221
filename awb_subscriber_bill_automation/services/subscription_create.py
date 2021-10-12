@@ -19,7 +19,7 @@ class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
     last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
-    expiry_date = fields.Date(string="Last Expiry Date", default='_compute_last_expiry_date')
+    expiry_date = fields.Date(string="Last Expiry Date", default=fields.Date.today())
 
     @api.depends('subscription_count')
     def _compute_last_reload_date(self):
@@ -29,13 +29,13 @@ class SubscriberRecord(models.Model):
             else:
                 rec.last_reload_date = False
 
-    @api.depends('subscription_count')
-    def _compute_last_expiry_date(self):
-        for rec in self:
-            if rec.plan_type.name == 'Prepaid':
-                rec.expiry_date = fields.Date.today()
-            else:
-                rec.expiry_date = False
+    # @api.depends('subscription_count')
+    # def _compute_last_expiry_date(self):
+    #     for rec in self:
+    #         if rec.plan_type.name == 'Prepaid':
+    #             rec.expiry_date = fields.Date.today()
+    #         else:
+    #             rec.expiry_date = False
                 
 
 class SubscriptionCreate(models.Model):
