@@ -3,7 +3,7 @@
     <record id="inherit_view_res_partner_form" model="ir.ui.view">
         <field name="name">inherit.view.partner.form</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="res.partner.view.partner.form"/>
+        <field name="inherit_id" ref="res_partner.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='subscription']" position="inside">
                 <group>
