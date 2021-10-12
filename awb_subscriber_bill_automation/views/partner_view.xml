@@ -9,7 +9,7 @@
                 <group>
                     <group string="Expiration">
                         <field name="last_reload_date" attrs="{'readonly': 1}"/>
-                        <!-- <field name="account_subclassification"/> -->
+                        <field name="expiry_date" attrs="{'readonly': 1}"/>
                     </group>
                 </group>
             </xpath>
