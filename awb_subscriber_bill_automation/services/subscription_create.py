@@ -35,7 +35,7 @@ class SubscriberRecord(models.Model):
             if rec.plan_type.name == 'Prepaid':
                 rec.expiry_date = fields.Date.today()
             else:
-                rec.expiry_date = None
+                rec.expiry_date = False
                 
 
 class SubscriptionCreate(models.Model):
