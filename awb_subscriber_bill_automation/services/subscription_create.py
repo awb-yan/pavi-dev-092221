@@ -18,16 +18,16 @@ _logger = logging.getLogger(__name__)
 class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
-    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
+    last_reload_date = fields.Date(string="Last Reload Date", default=fields.Date.today())
     # expiry_date = fields.Date(string="Last Expiry Date", default=fields.Date.today())
 
-    @api.depends('subscription_count')
-    def _compute_last_reload_date(self):
-        for rec in self:
-            if rec.plan_type.name == 'Prepaid':
-                rec.last_reload_date = fields.Date.today()
-            else:
-                rec.last_reload_date = False
+    # @api.depends('subscription_count')
+    # def _compute_last_reload_date(self):
+    #     for rec in self:
+    #         if rec.plan_type.name == 'Prepaid':
+    #             rec.last_reload_date = fields.Date.today()
+    #         else:
+    #             rec.last_reload_date = False
 
     # @api.depends('subscription_count')
     # def _compute_last_expiry_date(self):
