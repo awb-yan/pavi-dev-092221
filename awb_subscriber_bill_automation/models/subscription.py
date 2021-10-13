@@ -112,10 +112,10 @@ class SaleSubscription(models.Model):
             self.env['sale.subscription'].provision_and_activation(self.record, main_plan, last_subscription, last_subs_main_plan, ctp)
 
             # Helper to update Odoo Opportunity
-            try:
-                self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)
-            except:
-                _logger.error(f'SMS:: !!! Failed SF Account Update - Subscription code {self.record.code}')            
+            # try:
+            #     self._update_account(main_plan, self.record, sf_update_type, max_fail_retries)
+            # except:
+            #     _logger.error(f'SMS:: !!! Failed SF Account Update - Subscription code {self.record.code}')            
 
         if not ctp:
             self.env['sale.subscription'].generate_atmref(self.record, max_fail_retries)
