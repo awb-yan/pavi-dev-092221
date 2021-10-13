@@ -44,8 +44,8 @@ class SubscriptionCreate(models.Model):
             self._provision_prepaid(record, ctp)
 
         # Facility Type routing
-        if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
+        # if aradial_flag:
+        #     self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
 
         self._start_subscription(record, max_retries, ctp)
 
