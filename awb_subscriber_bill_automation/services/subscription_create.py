@@ -46,7 +46,7 @@ class SubscriptionCreate(models.Model):
         # Facility Type routing
         # if aradial_flag:
         #     self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
-
+        self._getTimebank(record)
         self._start_subscription(record, max_retries, ctp)
 
        
@@ -254,7 +254,14 @@ class SubscriptionCreate(models.Model):
 
     def _getTimebank(self, rec):
 
+        _logger.info(f' recurring_rule_boundary: {rec.recurring_rule_boundary}')
+        _logger.info(f' recurring_rule_type: {rec.recurring_rule_type}')
         _logger.info(f' recurring_rule_count: {rec.template_id.recurring_rule_count}')
         _logger.info(f' recurring_interval: {rec.template_id.recurring_interval}')
-        seconds_per_day = 86400
-        return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
+        # seconds_per_day = 86400
+        # return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
+
+                    # if rec.recurring_rule_boundary == 'limited':
+                    #     periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
+                    #     rec.end_datetime = fields.Datetime.from_string(rec.start_datetime) + relativedelta(**{
+                    #     periods[rec.recurring_rule_type]: rec.template_id.recurring_rule_count * rec.template_id.recurring_interval})
