@@ -33,7 +33,7 @@ class SubscriptionDisconnect(models.Model):
             ('expiry_date', '<=', date_to_discon.strftime("%Y-%m-%d 11:59:59"))])
         # search for the subscription using the customer_number
         for contact in contacts_to_discon:
-            latest_subs = self.env['sale.subscription'].search([('customer_number', 'in', contact.customer_number)], order='id desc', limit=1)
+            latest_subs = self.env['sale.subscription'].search([('customer_number', '=', contact.customer_number)], order='id desc', limit=1)
             self._change_status_subtype(latest_subs,'disconnection-permanent')
             try:
                 self._update_account(main_plan, latest_subs, sf_update_type, max_fail_retries)
