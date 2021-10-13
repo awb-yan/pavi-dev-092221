@@ -18,25 +18,8 @@ _logger = logging.getLogger(__name__)
 class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
-    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
-    expiry_date = fields.Date(string="Last Expiry Date", default=fields.Date.today())
-
-    @api.depends('subscription_count')
-    def _compute_last_reload_date(self):
-        for rec in self:
-            if rec.plan_type.name == 'Prepaid':
-                rec.last_reload_date = fields.Date.today()
-            else:
-                rec.last_reload_date = False
-
-    # @api.depends('subscription_count')
-    # def _compute_last_expiry_date(self):
-    #     for rec in self:
-    #         if rec.plan_type.name == 'Prepaid':
-    #             rec.expiry_date = fields.Date.today()
-    #         else:
-    #             rec.expiry_date = False
-                
+    last_reload_date = fields.Date(string="Last Reload Date", default=False)
+    expiry_date = fields.Date(string="Last Expiry Date", default=False)
 
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
@@ -198,13 +181,22 @@ class SubscriptionCreate(models.Model):
         _logger.info('SMS:: function: start_subscription')
 
         try:
+            now = datetime.now().strftime("%Y-%m-%d")
+            self.record = record
             # YANYAN
             # Get # of expiry days from sys param
-            # search for the contact record and update the expiry_date
-            # expiry_date = last reload_date + duration + expiry_days
+            IrConfigParameter = self.env['ir.config_parameter'].sudo()
+            prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
-            self.record = record
-            now = datetime.now().strftime("%Y-%m-%d")
+            # expiry_date = last reload_date + duration + expiry_days
+            last_reload_date = fields.Date.today()
+            expiry_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=int(prepaid_days))
+
+            self.env['res.partner'].search([("customer_number","=",record.customer_number)]).write({
+                'last_reload_date': last_reload_date,
+                'expiry_date': expiry_date
+                })
+
             self.record.write({
                 'date_start': now,
                 'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
