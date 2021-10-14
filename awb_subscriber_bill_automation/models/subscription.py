@@ -17,6 +17,12 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+class SubscriberRecord(models.Model):
+    _inherit = 'res.partner'
+
+    last_reload_date = fields.Date(string="Last Reload Date")
+    expiry_date = fields.Date(string="Last Expiry Date")
+
 
 class SaleSubscription(models.Model):
     _inherit = "sale.subscription"

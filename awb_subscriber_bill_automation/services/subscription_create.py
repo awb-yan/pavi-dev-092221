@@ -15,24 +15,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class SubscriberRecord(models.Model):
-    _inherit = 'res.partner'
-
-    last_reload_date = fields.Date(string="Last Reload Date")
-    expiry_date = fields.Date(string="Last Expiry Date")
-
-    # @api.depends('opportunity_count')
-    # def _compute_last_reload_date(self):
-    #     for rec in self:
-    #         if rec.plan_type == 1:
-    #             rec.last_reload_date = False
-
-    # @api.depends('opportunity_count')
-    # def _compute_expiry_date(self):
-    #     for rec in self:
-    #         if rec.plan_type == 1:
-    #             rec.expiry_date = False
-
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
 
@@ -56,9 +38,9 @@ class SubscriptionCreate(models.Model):
             self._provision_prepaid(record, ctp)
 
         # Facility Type routing
-        # if aradial_flag:
-        #     self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
-        self._getTimebank(record)
+        if aradial_flag:
+            self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
+
         self._start_subscription(record, max_retries, ctp)
 
        
@@ -195,12 +177,10 @@ class SubscriptionCreate(models.Model):
         try:
             now = datetime.now().strftime("%Y-%m-%d")
             self.record = record
-            # YANYAN
-            # Get # of expiry days from sys param
+
             IrConfigParameter = self.env['ir.config_parameter'].sudo()
             prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
-            # expiry_date = last reload_date + duration + expiry_days
             last_reload_date = fields.Date.today()
             expiry_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=int(prepaid_days))
 
