@@ -21,13 +21,13 @@ class SubscriberRecord(models.Model):
     last_reload_date = fields.Date(string="Last Reload Date", compute='_compute_last_reload_date')
     expiry_date = fields.Date(string="Last Expiry Date", compute='_compute_expiry_date')
 
-    @api.depends('subscription_count')
+    @api.depends('opportunity_count')
     def _compute_last_reload_date(self):
         for rec in self:
             if rec.plan_type == 1:
                 rec.last_reload_date = False
 
-    @api.depends('subscription_count')
+    @api.depends('opportunity_count')
     def _compute_expiry_date(self):
         for rec in self:
             if rec.plan_type == 1:
