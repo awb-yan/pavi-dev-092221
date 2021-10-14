@@ -18,8 +18,20 @@ _logger = logging.getLogger(__name__)
 class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
-    last_reload_date = fields.Date(string="Last Reload Date", default=False)
-    expiry_date = fields.Date(string="Last Expiry Date", default=False)
+    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
+    expiry_date = fields.Date(string="Last Expiry Date", default='_compute_expiry_date')
+
+    @api.depends('subscription_count')
+    def _compute_last_reload_date(self):
+        for rec in self:
+            if rec.plan_type == 1:
+                rec.last_reload_date = False
+
+    @api.depends('subscription_count')
+    def _compute_expiry_date(self):
+        for rec in self:
+            if rec.plan_type == 1:
+                rec.expiry_date = False
 
 class SubscriptionCreate(models.Model):
     _inherit = "sale.subscription"
@@ -254,14 +266,6 @@ class SubscriptionCreate(models.Model):
 
     def _getTimebank(self, rec):
 
-        _logger.info(f' recurring_rule_boundary: {rec.recurring_rule_boundary}')
-        _logger.info(f' recurring_rule_type: {rec.recurring_rule_type}')
-        _logger.info(f' recurring_rule_count: {rec.template_id.recurring_rule_count}')
-        _logger.info(f' recurring_interval: {rec.template_id.recurring_interval}')
-        # seconds_per_day = 86400
-        # return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
-
-                    # if rec.recurring_rule_boundary == 'limited':
-                    #     periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
-                    #     rec.end_datetime = fields.Datetime.from_string(rec.start_datetime) + relativedelta(**{
-                    #     periods[rec.recurring_rule_type]: rec.template_id.recurring_rule_count * rec.template_id.recurring_interval})
+        _logger.info('SMS:: get_timebank')
+        seconds_per_day = 86400
+        return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
