@@ -18,8 +18,8 @@ _logger = logging.getLogger(__name__)
 class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
-    last_reload_date = fields.Date(string="Last Reload Date", default='_compute_last_reload_date')
-    expiry_date = fields.Date(string="Last Expiry Date", default='_compute_expiry_date')
+    last_reload_date = fields.Date(string="Last Reload Date", compute='_compute_last_reload_date')
+    expiry_date = fields.Date(string="Last Expiry Date", compute='_compute_expiry_date')
 
     @api.depends('subscription_count')
     def _compute_last_reload_date(self):
