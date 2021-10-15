@@ -231,7 +231,7 @@ class SubscriptionCreate(models.Model):
 
         except:
             if max_retries > 1:
-                self._start_subscription(record, max_retries-1)
+                self._start_subscription(record, max_retries-1, ctp)
             else:
                 _logger.error(f'SMS:: !!! Error encountered while starting subscription for {self.record.code}..')
                 raise Exception(f'SMS:: !!! Error encountered while starting subscription for {self.record.code}..')
