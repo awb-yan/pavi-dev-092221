@@ -173,6 +173,8 @@ class SubscriptionCreate(models.Model):
     def _start_subscription(self, record, max_retries, ctp):
 
         _logger.info('SMS:: function: start_subscription')
+        _logger.info(f'ctp: {ctp}')
+        _logger.info(f'max_retries: {max_retries}')
 
         try:
             now = datetime.now().strftime("%Y-%m-%d")
