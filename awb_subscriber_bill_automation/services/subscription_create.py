@@ -199,6 +199,7 @@ class SubscriptionCreate(models.Model):
             _logger.info(f'last_reload_date: {last_reload_date}')
             _logger.info(f'last_end_date: {last_end_date}')
             _logger.info(f'expiry_date: {expiry_date}')
+            
             contact.write({
                 'last_reload_date': last_reload_date,
                 'expiry_date': expiry_date
