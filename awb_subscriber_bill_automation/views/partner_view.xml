@@ -9,7 +9,6 @@
                 <group attrs="{'invisible': [('plan_type','!=', 1)]}">
                     <group string="Expiration">
                         <field name="last_reload_date" attrs="{'readonly': 1}"/>
-                        <field name="last_end_date" attrs="{'readonly': 1}"/>
                         <field name="expiry_date" attrs="{'readonly': 1}"/>
                     </group>
                 </group>
