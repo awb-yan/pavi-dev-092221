@@ -173,17 +173,17 @@ class SubscriptionCreate(models.Model):
     def _start_subscription(self, record, max_retries, ctp):
 
         _logger.info('SMS:: function: start_subscription')
-        _logger.info(f'ctp: {ctp}')
-        _logger.info(f'max_retries: {max_retries}')
 
         try:
             now = datetime.now().strftime("%Y-%m-%d")
+            _logger.info(f'now: {now}')
             self.record = record
 
             IrConfigParameter = self.env['ir.config_parameter'].sudo()
             prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
             last_reload_date = now
+            _logger.info(f'last_reload_date: {last_reload_date}')
 
             contact = self.env['res.partner'].search([("customer_number","=",record.customer_number)])
             if contact.last_reload_date is not None and contact.last_end_date > now:
