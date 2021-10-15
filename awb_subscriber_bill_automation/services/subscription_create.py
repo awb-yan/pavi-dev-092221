@@ -267,5 +267,5 @@ class SubscriptionCreate(models.Model):
         _logger.info(f'recurring_rule_count: {rec.template_id.recurring_rule_count}')
         _logger.info(f'recurring_interval: {rec.template_id.recurring_interval}')
 
-        seconds_per_day = 86400
-        return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
+        # seconds_per_day = 86400
+        # return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
