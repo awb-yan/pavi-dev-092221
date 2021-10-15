@@ -200,6 +200,7 @@ class SubscriptionCreate(models.Model):
                 # add the difference to the new end date
                 _logger.info(f'reloading for non-expired load')
                 days_remaining = abs((contact.last_end_date - date_today).days)
+                _logger.info(f'days_remaining: {days_remaining}')
                 last_end_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=days_remaining)
                 expiry_date = last_end_date + relativedelta(days=int(prepaid_days))
 
@@ -209,6 +210,7 @@ class SubscriptionCreate(models.Model):
             
             contact.write({
                 'last_reload_date': last_reload_date,
+                'last_end_date': last_end_date,
                 'expiry_date': expiry_date
                 })
 
