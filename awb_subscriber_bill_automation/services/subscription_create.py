@@ -188,7 +188,8 @@ class SubscriptionCreate(models.Model):
             contact = self.env['res.partner'].search([("customer_number","=",record.customer_number)])
             _logger.info(f'contact.last_reload_date: {contact.last_reload_date}')
             _logger.info(f'contact.last_end_date: {contact.last_end_date}')
-            if contact.last_reload_date is not None and contact.last_end_date > now:
+            _logger.info(f'contact.last_end_date > now: {contact.last_end_date > now}')
+            if contact.last_reload_date and contact.last_end_date > now:
                 # get the dofferemce between last end date and today
                 # add the difference to the new end date
                 _logger.info(f'reloading for non-expired load')
