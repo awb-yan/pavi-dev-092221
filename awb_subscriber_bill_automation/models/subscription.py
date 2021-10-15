@@ -21,6 +21,7 @@ class SubscriberRecord(models.Model):
     _inherit = 'res.partner'
 
     last_reload_date = fields.Date(string="Last Reload Date")
+    last_end_date = fields.Date(string="End date of the Last Reload")
     expiry_date = fields.Date(string="Last Expiry Date")
 
 

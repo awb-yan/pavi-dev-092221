@@ -181,10 +181,25 @@ class SubscriptionCreate(models.Model):
             IrConfigParameter = self.env['ir.config_parameter'].sudo()
             prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
-            last_reload_date = fields.Date.today()
-            expiry_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=int(prepaid_days))
+            last_reload_date = now
 
-            self.env['res.partner'].search([("customer_number","=",record.customer_number)]).write({
+            contact = self.env['res.partner'].search([("customer_number","=",record.customer_number)])
+            if contact.last_reload_date is not None and contact.last_end_date > now:
+                # get the dofferemce between last end date and today
+                # add the difference to the new end date
+                _logger.info(f'reloading for non-expired load')
+                days_remaining = abs((contact.last_end_date - now).days)
+                last_end_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=days_remaining)
+                expiry_date = last_end_date + relativedelta(days=int(prepaid_days))
+            else:
+                _logger.info(f'new subs or reloading for expired load')
+                last_end_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval)
+                expiry_date = last_end_date + relativedelta(days=int(prepaid_days))
+
+            _logger.info(f'last_reload_date: {last_reload_date}')
+            _logger.info(f'last_end_date: {last_end_date}')
+            _logger.info(f'expiry_date: {expiry_date}')
+            contact.write({
                 'last_reload_date': last_reload_date,
                 'expiry_date': expiry_date
                 })
