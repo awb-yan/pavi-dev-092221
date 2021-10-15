@@ -175,23 +175,23 @@ class SubscriptionCreate(models.Model):
         _logger.info('SMS:: function: start_subscription')
 
         try:
-            now = datetime.now().strftime("%Y-%m-%d")
-            _logger.info(f'now: {now}')
+            # now = datetime.now().strftime("%Y-%m-%d")
+            # _logger.info(f'now: {now}')
+            date_today = fields.Date.today()
             self.record = record
-
             IrConfigParameter = self.env['ir.config_parameter'].sudo()
             prepaid_days = IrConfigParameter.get_param('prepaid_physical_discon_days')
 
-            last_reload_date = now
+            last_reload_date = date_today
             _logger.info(f'last_reload_date: {last_reload_date}')
 
             contact = self.env['res.partner'].search([("customer_number","=",record.customer_number)])
             _logger.info(f'contact.last_reload_date: {contact.last_reload_date}')
             _logger.info(f'contact.last_end_date: {contact.last_end_date}')
             _logger.info(f'type of contact.last_end_date: {type(contact.last_end_date)}')
-            _logger.info(f'type of now: {type(now)}')
+            # _logger.info(f'type of now: {type(now)}')
             # _logger.info(f'contact.last_end_date > now: {datetime.strptime(contact.last_end_date, "%Y-%m-%d") > datetime.strptime(now, "%Y-%m-%d")}')
-            if not contact.last_reload_date or datetime.strptime(contact.last_end_date, "%Y-%m-%d") < datetime.strptime(now, "%Y-%m-%d"):
+            if not contact.last_reload_date or contact.last_end_date < date_today:
                 _logger.info(f'new subs or reloading for expired load')
                 last_end_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval)
                 expiry_date = last_end_date + relativedelta(days=int(prepaid_days))
@@ -199,7 +199,7 @@ class SubscriptionCreate(models.Model):
                 # get the dofferemce between last end date and today
                 # add the difference to the new end date
                 _logger.info(f'reloading for non-expired load')
-                days_remaining = abs((contact.last_end_date - datetime.strptime(now)).days)
+                days_remaining = abs((contact.last_end_date - date_today).days)
                 last_end_date = last_reload_date + relativedelta(days=record.template_id.recurring_interval) + relativedelta(days=days_remaining)
                 expiry_date = last_end_date + relativedelta(days=int(prepaid_days))
 
@@ -213,7 +213,7 @@ class SubscriptionCreate(models.Model):
                 })
 
             self.record.write({
-                'date_start': now,
+                'date_start': date_today,
                 'stage_id': self.env['sale.subscription.stage'].search([("name", "=", "In Progress")]).id,
                 'in_progress': True
             })
