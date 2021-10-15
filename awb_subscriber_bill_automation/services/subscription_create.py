@@ -38,9 +38,9 @@ class SubscriptionCreate(models.Model):
             self._provision_prepaid(record, ctp)
 
         # Facility Type routing
-        if aradial_flag:
-            self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
-
+        # if aradial_flag:
+        #     self._send_to_aradial(record, main_plan, max_retries, last_subscription, last_subs_main_plan, plan_type, ctp)
+        self._getTimebank(record)
         self._start_subscription(record, max_retries, ctp)
 
        
@@ -247,5 +247,9 @@ class SubscriptionCreate(models.Model):
     def _getTimebank(self, rec):
 
         _logger.info('SMS:: get_timebank')
+
+        _logger.info(f'recurring_rule_count: {rec.template_id.recurring_rule_count}')
+        _logger.info(f'recurring_interval: {rec.template_id.recurring_interval}')
+
         seconds_per_day = 86400
         return (rec.template_id.recurring_rule_count * rec.template_id.recurring_interval) * seconds_per_day
