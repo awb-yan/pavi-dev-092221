@@ -188,6 +188,8 @@ class SubscriptionCreate(models.Model):
             contact = self.env['res.partner'].search([("customer_number","=",record.customer_number)])
             _logger.info(f'contact.last_reload_date: {contact.last_reload_date}')
             _logger.info(f'contact.last_end_date: {contact.last_end_date}')
+            _logger.info(f'type of contact.last_end_date: {type(contact.last_end_date)}')
+            _logger.info(f'type of now: {type(now)}')
             _logger.info(f'contact.last_end_date > now: {datetime.strptime(contact.last_end_date, "%Y-%m-%d") > datetime.strptime(now, "%Y-%m-%d")}')
             if contact.last_reload_date and datetime.strptime(contact.last_end_date, "%Y-%m-%d") > datetime.strptime(now, "%Y-%m-%d"):
                 # get the dofferemce between last end date and today
