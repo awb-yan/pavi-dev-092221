@@ -18,6 +18,7 @@
                 <field name="opportunity_id" readonly="1"/>
                 <field name="atm_ref"/>
                 <field name="atm_ref_sequence"/>
+                <field name="amount_due" readonly="1"/>
             </xpath>
 
             <xpath expr="//field[@name='price_subtotal']" position="after">

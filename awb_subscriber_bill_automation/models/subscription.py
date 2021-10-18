@@ -54,6 +54,7 @@ class SaleSubscription(models.Model):
     # New Fields
 
     plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type', store=True)
+    amount_due = fields.Float('account.move', compute='_compute_amount_due', store=True)
 
     # Business Logic
 
@@ -68,7 +69,17 @@ class SaleSubscription(models.Model):
 
             rec.plan_type = plan_type_id
 
+    @api.depends('invoice_line_ids')
+    def _compute_amount_due(self):
+        for rec in self:
+            amnt_due = 0
+            invoices = self.env['account.move'].search([('customer_number','=',rec.customer_number), ('state', '=', 'posted'), ('invoice_payment_state', '!=', 'paid')])
+            for invoice in invoices:
+                amnt_due += invoice.amount_residual_signed
+            
+            rec.amount_due = amnt_due
 
+    
     @api.model
     def create(self, vals):
         # Commenting this for now
