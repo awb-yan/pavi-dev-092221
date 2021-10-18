@@ -69,7 +69,7 @@ class SaleSubscription(models.Model):
 
             rec.plan_type = plan_type_id
 
-    @api.depends('invoice_line_ids')
+    @api.depends('invoice_count')
     def _compute_amount_due(self):
         for rec in self:
             amnt_due = 0
