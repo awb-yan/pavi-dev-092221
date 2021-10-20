@@ -19,7 +19,7 @@
                 <field name="amount_due" position="attributes">
                     <attribute name="groups">sale_subscription.group_sale_subscription_manager,account.group_account_invoice</attribute>
                     <attribute name="string">Amount Due</attribute>
-                    <attribute name="readonly">readonly</attribute>
+                    <attribute name="attrs">{'readonly':1}</attribute>
                 </field>
                 <field name="atm_ref"/>
                 <field name="atm_ref_sequence"/>
