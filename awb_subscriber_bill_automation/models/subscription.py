@@ -54,7 +54,7 @@ class SaleSubscription(models.Model):
     # New Fields
 
     plan_type = fields.Many2one('product.plan.type', compute='_compute_plan_type', store=True)
-    amount_due = fields.Float('account.move', compute='_compute_amount_due', store=True)
+    amount_due = fields.Float("Amount Due", compute='_compute_amount_due', store=True, readonly=True)
 
     # Business Logic
 
