@@ -69,15 +69,19 @@ class SaleSubscription(models.Model):
 
             rec.plan_type = plan_type_id
 
-    @api.depends('invoice_count')
+    @api.depends('invoice_count','payment_mode')
     def _compute_amount_due(self):
         for rec in self:
             amnt_due = 0
-            invoices = self.env['account.move'].search([('customer_number','=',rec.customer_number), ('state', '=', 'posted'), ('invoice_payment_state', '!=', 'paid')])
+            amnt_paid = 0
+            invoices = self.env['account.move'].search([('customer_number','=',rec.customer_number), ('state', '=', 'posted')])
             for invoice in invoices:
                 amnt_due += invoice.amount_residual_signed
+            payments = self.env['account.payment'].search([('x_studio_customer_id','=',rec.customer_number), ('state', '=', 'posted')])
+            for payment in payments:
+                amnt_paid += payment.amount
             
-            rec.amount_due = amnt_due
+            rec.amount_due = amnt_due - amnt_paid
 
     
     @api.model
