@@ -16,7 +16,7 @@
 
             <xpath expr="//field[@name='code']" position="after">
                 <field name="opportunity_id" readonly="1"/>
-                <field name="amount_due" groups="account.group_account_invoice"/>
+                <field name="amount_due" groups="account.group_account_user,account.group_account_invoice"/>
                     <!-- <attribute name="groups">sale_subscription.group_sale_subscription_manager,account.group_account_invoice</attribute> -->
                 <!-- </field> -->
                 <field name="atm_ref"/>
