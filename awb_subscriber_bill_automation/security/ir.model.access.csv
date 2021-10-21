@@ -4,5 +4,3 @@ access_auspost_service_manager,delivery.carrier.auspost.service,model_delivery_c
 
 access_auspost_order_users,aupost.order.shipment,model_aupost_order_shipment,,1,0,0,0
 access_auspost_order_manager,aupost.order.shipment,model_aupost_order_shipment,stock.group_stock_manager,1,1,1,1
-
-access_accounting_billing,accounting.billing,model_accounting_billing,account.group_account_invoice,1,1,1,1
